@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grammar Master Exercise</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f4f6fb; color: #222; min-height: 100vh; }
+
+  .page-header { background: #1a56a0; color: white; padding: 18px 28px; }
+  .page-header h1 { font-size: 22px; font-weight: 700; }
+  .page-header p { font-size: 14px; margin-top: 4px; opacity: 0.85; }
+
+  .difficulty-selector {
+    background: white;
+    border-bottom: 2px solid #dde3ef;
+    padding: 20px 28px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .difficulty-selector label { font-size: 15px; font-weight: 600; color: #333; }
+  .diff-btn {
+    background: white;
+    color: #1a56a0;
+    border: 2px solid #1a56a0;
+    border-radius: 7px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .diff-btn:hover { background: #e8f0fe; }
+  .diff-btn.active { background: #1a56a0; color: white; }
+  .start-btn {
+    background: #34a853;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: auto;
+    transition: background 0.15s;
+  }
+  .start-btn:hover { background: #2d9248; }
+
+  .layout { display: flex; gap: 0; min-height: calc(100vh - 150px); }
+
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: #fff;
+    border-right: 1px solid #dde3ef;
+    padding: 16px 14px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar h2 { font-size: 13px; font-weight: 700; color: #1a56a0; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+  .word-bank { display: flex; flex-direction: column; gap: 7px; }
+  .chip {
+    background: #e8f0fe;
+    color: #1a56a0;
+    border: 1.5px solid #b5cef7;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+    text-align: center;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .chip:hover { background: #d0e4ff; transform: scale(1.03); }
+  .chip.dragging { opacity: 0.4; }
+  .chip.used { display: none; }
+
+  .main { flex: 1; padding: 24px 32px; max-width: 780px; }
+  .main.hidden { display: none; }
+
+  .instructions {
+    background: #e8f0fe;
+    border: 1px solid #b5cef7;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #1a3a6b;
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+
+  .sentences { display: flex; flex-direction: column; gap: 4px; }
+  .sentence-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 8px;
+    border-bottom: 1px solid #e8ecf4;
+    font-size: 15px;
+    flex-wrap: wrap;
+    line-height: 1.9;
+  }
+  .sentence-row:last-child { border-bottom: none; }
+  .num { font-weight: 700; color: #888; font-size: 13px; min-width: 24px; flex-shrink: 0; }
+
+  .drop-zone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 32px;
+    border-bottom: 2.5px solid #1a56a0;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s;
+    vertical-align: middle;
+  }
+  .drop-zone.drag-over { background: #d0e4ff; border-radius: 4px; }
+  .drop-zone.filled {
+    background: #e8f0fe;
+    border: 1.5px solid #b5cef7;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1a56a0;
+    cursor: pointer;
+  }
+  .drop-zone.correct { background: #e6f4ea !important; border-color: #34a853 !important; color: #1e7e34 !important; }
+  .drop-zone.incorrect { background: #fce8e6 !important; border-color: #ea4335 !important; color: #c0392b !important; }
+
+  .controls { margin-top: 28px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn-check {
+    background: #1a56a0; color: white; border: none; border-radius: 7px;
+    padding: 11px 28px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-check:hover { background: #154a8a; }
+  .btn-reset {
+    background: white; color: #555; border: 1.5px solid #ccc; border-radius: 7px;
+    padding: 10px 22px; font-size: 14px; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-reset:hover { background: #f0f0f0; }
+  .btn-new {
+    background: #34a853; color: white; border: none; border-radius: 7px;
+    padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+  }
+  .btn-new:hover { background: #2d9248; }
+  .score-msg { font-size: 15px; font-weight: 600; color: #1a56a0; }
+
+  .welcome-screen {
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 32px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .welcome-screen h2 { font-size: 24px; color: #1a56a0; margin-bottom: 16px; }
+  .welcome-screen p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 24px; }
+  .welcome-screen .levels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .level-card {
+    background: #f8f9fa;
+    border: 2px solid #dde3ef;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .level-card:hover { background: #e8f0fe; border-color: #1a56a0; }
+  .level-card.selected { background: #e8f0fe; border-color: #1a56a0; }
+  .level-card h3 { font-size: 17px; color: #1a56a0; margin-bottom: 6px; }
+  .level-card p { font-size: 13px; color: #666; line-height: 1.5; }
+
+  canvas#confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="page-header">
+  <h1>🎯 Grammar Master Exercise</h1>
+  <p>Practice all parts of speech with shuffled exercises at your chosen difficulty level</p>
+</div>
+
+<div class="welcome-screen" id="welcomeScreen">
+  <h2>Choose Your Difficulty Level</h2>
+  <p>Each level contains 25 sentences covering all parts of speech. The exercises shuffle every time you start, so you can practice multiple times without memorizing answers.</p>
+  
+  <div class="levels">
+    <div class="level-card" onclick="selectLevel('easy')">
+      <h3>🟢 Easy Level</h3>
+      <p>Common vocabulary, clear context clues, straightforward sentence structures</p>
+    </div>
+    <div class="level-card" onclick="selectLevel('medium')">
+      <h3>🟡 Medium Level</h3>
+      <p>Mixed vocabulary, some tricky conjunctions and prepositions, moderate complexity</p>
+    </div>
+    <div class="level-card" onclick="selectLevel('hard')">
+      <h3>🔴 Hard Level</h3>
+      <p>Advanced vocabulary, subtle distinctions, complex sentence structures</p>
+    </div>
+  </div>
+  
+  <button class="start-btn" id="startBtn" onclick="startExercise()" style="margin-top: 24px; display: none;">Start Exercise →</button>
+</div>
+
+<div class="layout" id="exerciseLayout" style="display: none;">
+  <div class="sidebar">
+    <h2>Word Bank</h2>
+    <div class="word-bank" id="wordBank"></div>
+  </div>
+
+  <div class="main">
+    <div class="instructions">
+      📌 Each sentence is missing one word. Drag the correct word from the word bank into the blank. Click a filled blank to return the word to the bank. Each word is used only once.
+    </div>
+
+    <div class="sentences" id="sentences"></div>
+
+    <div class="controls">
+      <button class="btn-check" onclick="checkAnswers()">Check Answers</button>
+      <button class="btn-reset" onclick="resetAll()">Reset</button>
+      <button class="btn-new" onclick="newExercise()">New Exercise</button>
+      <span class="score-msg" id="scoreMsg"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+const easyData = [
+  { before: "She went", after: "the store to buy milk.", answer: "to", id: "e1" },
+  { before: "The meeting was", after: "because everyone participated.", answer: "productive", id: "e2" },
+  { before: "He", after: "his homework before dinner.", answer: "finished", id: "e3" },
+  { before: "They arrived", after: "despite the heavy traffic.", answer: "early", id: "e4" },
+  { before: "I like coffee,", after: "I prefer tea in the morning.", answer: "but", id: "e5" },
+  { before: "The cat is sleeping", after: "the sofa.", answer: "on", id: "e6" },
+  { before: "She speaks", answer: "fluently", after: "even though English is her second language.", id: "e7" },
+  { before: "The project was", after: "completed on time.", answer: "successfully", id: "e8" },
+  { before: "He", after: "a new job last month.", answer: "started", id: "e9" },
+  { before: "The presentation was very", after: "and everyone understood the topic.", answer: "clear", id: "e10" },
+  { before: "We stayed home", after: "it was raining.", answer: "because", id: "e11" },
+  { before: "She walked", after: "the park every morning.", answer: "through", id: "e12" },
+  { before: "The food tastes", after: "with these fresh ingredients.", answer: "delicious", id: "e13" },
+  { before: "He", after: "three languages fluently.", answer: "speaks", id: "e14" },
+  { before: "They worked", after: "to finish the report by Friday.", answer: "hard", id: "e15" },
+  { before: "I will go shopping", after: "I finish work.", answer: "after", id: "e16" },
+  { before: "The book is", after: "the table.", answer: "under", id: "e17" },
+  { before: "She is a very", after: "teacher who cares about her students.", answer: "dedicated", id: "e18" },
+  { before: "We", after: "at the restaurant last night.", answer: "ate", id: "e19" },
+  { before: "He answered the question", after: "without any hesitation.", answer: "confidently", id: "e20" },
+  { before: "You can have tea", after: "coffee — whichever you prefer.", answer: "or", id: "e21" },
+  { before: "The office is located", after: "Main Street.", answer: "on", id: "e22" },
+  { before: "It was a", after: "day, perfect for a picnic.", answer: "beautiful", id: "e23" },
+  { before: "She", after: "the email immediately after reading it.", answer: "replied", id: "e24" },
+  { before: "He worked", after: "on the project until it was perfect.", answer: "carefully", id: "e25" }
+];
+
+const mediumData = [
+  { before: "She completed the task", after: "being interrupted several times.", answer: "despite", id: "m1" },
+  { before: "The results were", after: "better than anyone had expected.", answer: "significantly", id: "m2" },
+  { before: "He", after: "the problem before anyone else noticed it.", answer: "identified", id: "m3" },
+  { before: "They moved to the city", after: "better job opportunities.", answer: "for", id: "m4" },
+  { before: "She responded", after: "to the criticism during the meeting.", answer: "calmly", id: "m5" },
+  { before: "I'll attend the conference", after: "the cost is reasonable.", answer: "if", id: "m6" },
+  { before: "The solution seemed", after: ", but it turned out to be quite complex.", answer: "simple", id: "m7" },
+  { before: "He", after: "his opinion clearly during the discussion.", answer: "expressed", id: "m8" },
+  { before: "The team worked", after: "to meet the tight deadline.", answer: "efficiently", id: "m9" },
+  { before: "She walked", after: "the corridor looking for the conference room.", answer: "along", id: "m10" },
+  { before: "The project was challenging,", after: "we managed to complete it successfully.", answer: "nevertheless", id: "m11" },
+  { before: "His explanation was", after: "enough for everyone to understand.", answer: "thorough", id: "m12" },
+  { before: "They", after: "a new approach to solve the recurring problem.", answer: "implemented", id: "m13" },
+  { before: "She arrived", after: "everyone else had already left.", answer: "after", id: "m14" },
+  { before: "The instructions were", after: "written and easy to follow.", answer: "clearly", id: "m15" },
+  { before: "He postponed the meeting", after: "the key participant was unavailable.", answer: "since", id: "m16" },
+  { before: "The building is located", after: "the intersection of two major roads.", answer: "at", id: "m17" },
+  { before: "Her presentation was", after: "and captured everyone's attention.", answer: "compelling", id: "m18" },
+  { before: "We", after: "the data carefully before making our decision.", answer: "analyzed", id: "m19" },
+  { before: "The team performed", after: "under difficult circumstances.", answer: "admirably", id: "m20" },
+  { before: "You should review the contract", after: "signing it.", answer: "before", id: "m21" },
+  { before: "The documents are", after: "the locked cabinet for security.", answer: "in", id: "m22" },
+  { before: "It was an", after: "decision that affected the entire department.", answer: "important", id: "m23" },
+  { before: "She", after: "the proposal with strong supporting evidence.", answer: "defended", id: "m24" },
+  { before: "He spoke", after: "about his concerns during the meeting.", answer: "frankly", id: "m25" }
+];
+
+const hardData = [
+  { before: "She handed in the report", after: "the deadline, even though she had barely slept.", answer: "before", id: "h1" },
+  { before: "The presentation was", after: "— three hours of data and no coffee break.", answer: "exhausting", id: "h2" },
+  { before: "He", after: "on finishing the project alone, even when his teammates offered to help.", answer: "insisted", id: "h3" },
+  { before: "The new policy affects everyone", after: "their role or department.", answer: "regardless", id: "h4" },
+  { before: "She", after: "agreed to the terms, but her body language told a different story.", answer: "reluctantly", id: "h5" },
+  { before: "The manager postponed the meeting", after: "there were still too many unresolved issues.", answer: "because", id: "h6" },
+  { before: "Living", after: "a foreign country teaches you a great deal about yourself.", answer: "in", id: "h7" },
+  { before: "The results were", after: "impressive, given how little time they had to prepare.", answer: "surprisingly", id: "h8" },
+  { before: "He", after: "the mistake immediately but didn't know how to fix it.", answer: "noticed", id: "h9" },
+  { before: "The instructions were so", after: "that even experienced users made errors.", answer: "confusing", id: "h10" },
+  { before: "She walked", after: "the crowded market without stopping to look at anything.", answer: "through", id: "h11" },
+  { before: "I would love to accept your offer,", after: "I've already made other plans.", answer: "however", id: "h12" },
+  { before: "The team", after: "the launch date by two weeks due to technical problems.", answer: "postponed", id: "h13" },
+  { before: "He speaks so", after: "that it's hard to follow him in a conversation.", answer: "rapidly", id: "h14" },
+  { before: "It was an", after: "opportunity — one she knew she couldn't afford to miss.", answer: "extraordinary", id: "h15" },
+  { before: "The letter had been sitting", after: "her desk for three days before she opened it.", answer: "on", id: "h16" },
+  { before: "She studied every night", after: "she still didn't feel confident before the exam.", answer: "but", id: "h17" },
+  { before: "The children", after: "heavily on their teacher for guidance during the difficult weeks.", answer: "relied", id: "h18" },
+  { before: "The film was", after: "different from what the trailer had suggested.", answer: "completely", id: "h19" },
+  { before: "He gave a", after: "account of everything that had happened that evening.", answer: "detailed", id: "h20" },
+  { before: "She moved to a new city", after: "having no friends or family there.", answer: "despite", id: "h21" },
+  { before: "The amount of work was", after: ", and several team members asked for extra support.", answer: "overwhelming", id: "h22" },
+  { before: "He", after: "his involvement in the incident after seeing the security footage.", answer: "admitted", id: "h23" },
+  { before: "The view from the top of the hill was so", after: "that nobody wanted to leave.", answer: "beautiful", id: "h24" },
+  { before: "She had", after: "enough time to review her notes before the interview began.", answer: "barely", id: "h25" }
+];
+
+let currentLevel = null;
+let currentData = [];
+let selectedChip = null;
+
+function selectLevel(level) {
+  currentLevel = level;
+  document.querySelectorAll('.level-card').forEach(card => card.classList.remove('selected'));
+  event.target.closest('.level-card').classList.add('selected');
+  document.getElementById('startBtn').style.display = 'block';
+}
+
+function startExercise() {
+  if (!currentLevel) return;
+  
+  if (currentLevel === 'easy') currentData = [...easyData];
+  else if (currentLevel === 'medium') currentData = [...mediumData];
+  else currentData = [...hardData];
+  
+  // Shuffle the data
+  currentData = currentData.sort(() => Math.random() - 0.5);
+  
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('exerciseLayout').style.display = 'flex';
+  
+  buildWordBank();
+  buildSentences();
+}
+
+function newExercise() {
+  // Clear everything
+  document.getElementById('wordBank').innerHTML = '';
+  document.getElementById('sentences').innerHTML = '';
+  document.getElementById('scoreMsg').textContent = '';
+  selectedChip = null;
+  
+  // Reshuffle and rebuild
+  currentData = currentData.sort(() => Math.random() - 0.5);
+  buildWordBank();
+  buildSentences();
+}
+
+function buildWordBank() {
+  const bank = document.getElementById('wordBank');
+  bank.innerHTML = '';
+  const shuffled = [...currentData].sort(() => Math.random() - 0.5);
+  shuffled.forEach(item => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = item.answer;
+    chip.dataset.id = item.id;
+    chip.draggable = true;
+    chip.id = 'chip_' + item.id;
+
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', item.id);
+      setTimeout(() => chip.classList.add('dragging'), 0);
+      if (selectedChip) { selectedChip.style.outline = ''; selectedChip = null; }
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('click', () => {
+      if (selectedChip === chip) { chip.style.outline = ''; selectedChip = null; }
+      else {
+        if (selectedChip) selectedChip.style.outline = '';
+        selectedChip = chip;
+        chip.style.outline = '2px solid #1a56a0';
+      }
+    });
+
+    bank.appendChild(chip);
+  });
+
+  const bank_el = document.getElementById('wordBank');
+  bank_el.addEventListener('dragover', e => e.preventDefault());
+  bank_el.addEventListener('drop', e => {
+    e.preventDefault();
+    const chipId = e.dataTransfer.getData('text/plain');
+    returnWordById(chipId);
+  });
+}
+
+function buildSentences() {
+  const container = document.getElementById('sentences');
+  container.innerHTML = '';
+  currentData.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'sentence-row';
+
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = (i + 1) + '.';
+
+    const before = document.createElement('span');
+    before.textContent = item.before + ' ';
+
+    const drop = document.createElement('div');
+    drop.className = 'drop-zone';
+    drop.dataset.target = item.id;
+
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault();
+      drop.classList.remove('drag-over');
+      const chipId = e.dataTransfer.getData('text/plain');
+      placeWord(chipId, drop);
+    });
+    drop.addEventListener('click', () => {
+      if (drop.dataset.filled) { returnWord(drop); }
+      else if (selectedChip) {
+        placeWord(selectedChip.dataset.id, drop);
+        selectedChip.style.outline = '';
+        selectedChip = null;
+      }
+    });
+
+    const after = document.createElement('span');
+    after.textContent = ' ' + item.after;
+
+    row.appendChild(num);
+    row.appendChild(before);
+    row.appendChild(drop);
+    row.appendChild(after);
+    container.appendChild(row);
+  });
+}
+
+function placeWord(chipId, drop) {
+  if (drop.dataset.filled) returnWord(drop);
+  const chip = document.getElementById('chip_' + chipId);
+  if (!chip) return;
+  chip.classList.add('used');
+  drop.textContent = chip.textContent;
+  drop.classList.add('filled');
+  drop.classList.remove('correct', 'incorrect');
+  drop.dataset.filled = chipId;
+}
+
+function returnWord(drop) {
+  const chipId = drop.dataset.filled;
+  if (!chipId) return;
+  returnWordById(chipId);
+  drop.textContent = '';
+  drop.classList.remove('filled', 'correct', 'incorrect');
+  delete drop.dataset.filled;
+}
+
+function returnWordById(chipId) {
+  const chip = document.getElementById('chip_' + chipId);
+  if (chip) chip.classList.remove('used');
+  const filledDrop = document.querySelector(`.drop-zone[data-filled="${chipId}"]`);
+  if (filledDrop) {
+    filledDrop.textContent = '';
+    filledDrop.classList.remove('filled', 'correct', 'incorrect');
+    delete filledDrop.dataset.filled;
+  }
+}
+
+function checkAnswers() {
+  let correct = 0;
+  document.querySelectorAll('.drop-zone').forEach(drop => {
+    if (!drop.dataset.filled) return;
+    if (drop.dataset.filled === drop.dataset.target) {
+      drop.classList.add('correct'); drop.classList.remove('incorrect'); correct++;
+    } else {
+      drop.classList.add('incorrect'); drop.classList.remove('correct');
+    }
+  });
+  const msg = document.getElementById('scoreMsg');
+  if (correct === currentData.length) {
+    msg.textContent = `🎉 Perfect score! ${correct} / ${currentData.length}`;
+    launchConfetti();
+  } else {
+    msg.textContent = `Score: ${correct} / ${currentData.length}`;
+  }
+}
+
+function resetAll() {
+  document.querySelectorAll('.drop-zone').forEach(drop => {
+    drop.textContent = '';
+    drop.classList.remove('filled', 'correct', 'incorrect');
+    delete drop.dataset.filled;
+  });
+  document.querySelectorAll('.chip').forEach(c => { c.classList.remove('used'); c.style.outline = ''; });
+  document.getElementById('scoreMsg').textContent = '';
+  selectedChip = null;
+}
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length: 160}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: 8 + Math.random() * 8, h: 5 + Math.random() * 5,
+    color: ['#1a56a0','#34a853','#fbbc04','#ea4335','#9c27b0','#00acc1'][Math.floor(Math.random()*6)],
+    speed: 2 + Math.random() * 4, angle: Math.random() * 360,
+    spin: (Math.random() - 0.5) * 6, drift: (Math.random() - 0.5) * 2
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle * Math.PI / 180);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+      p.y += p.speed; p.x += p.drift; p.angle += p.spin;
+    });
+    frame++;
+    if (frame < 180) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+}
+</script>
+</body>
+</html>
