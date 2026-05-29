@@ -8,7 +8,21 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: #f4f6fb; color: #222; min-height: 100vh; }
 
-  .page-header { background: #1a56a0; color: white; padding: 18px 28px; }
+  .page-header { background: #1a56a0; color: white; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .header-nav { display: flex; gap: 10px; }
+  .nav-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.3); border-color: white; }
+  .header-title { flex: 1; }
   .page-header h1 { font-size: 22px; font-weight: 700; }
   .page-header p { font-size: 14px; margin-top: 4px; opacity: 0.85; }
 
@@ -191,8 +205,14 @@
 <canvas id="confetti"></canvas>
 
 <div class="page-header">
-  <h1>🎯 Grammar Master Exercise</h1>
-  <p>Practice all parts of speech with shuffled exercises at your chosen difficulty level</p>
+  <div class="header-nav" id="headerNav" style="display: none;">
+    <button class="nav-btn" onclick="goBack()">← Back</button>
+    <button class="nav-btn" onclick="goToMainMenu()">⌂ Main Menu</button>
+  </div>
+  <div class="header-title">
+    <h1>🎯 Grammar Master Exercise</h1>
+    <p>Practice all parts of speech with shuffled exercises at your chosen difficulty level</p>
+  </div>
 </div>
 
 <div class="welcome-screen" id="welcomeScreen">
@@ -264,7 +284,7 @@ const easyData = [
   { before: "You can have tea", after: "coffee — whichever you prefer.", answer: "or", id: "e21" },
   { before: "The office is located", after: "Main Street.", answer: "on", id: "e22" },
   { before: "It was a", after: "day, perfect for a picnic.", answer: "beautiful", id: "e23" },
-  { before: "She", after: "the email immediately after reading it.", answer: "replied", id: "e24" },
+  { before: "She", after: "to the email immediately after reading it.", answer: "replied", id: "e24" },
   { before: "He worked", after: "on the project until it was perfect.", answer: "carefully", id: "e25" }
 ];
 
@@ -347,9 +367,28 @@ function startExercise() {
   
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('exerciseLayout').style.display = 'flex';
+  document.getElementById('headerNav').style.display = 'flex';
   
   buildWordBank();
   buildSentences();
+}
+
+function goBack() {
+  window.history.back();
+}
+
+function goToMainMenu() {
+  // Reset everything
+  document.getElementById('welcomeScreen').style.display = 'block';
+  document.getElementById('exerciseLayout').style.display = 'none';
+  document.getElementById('headerNav').style.display = 'none';
+  currentLevel = null;
+  selectedChip = null;
+  document.getElementById('wordBank').innerHTML = '';
+  document.getElementById('sentences').innerHTML = '';
+  document.getElementById('scoreMsg').textContent = '';
+  // Deselect all level cards
+  document.querySelectorAll('.level-card').forEach(card => card.classList.remove('selected'));
 }
 
 function newExercise() {
@@ -485,7 +524,17 @@ function checkAnswers() {
   let correct = 0;
   document.querySelectorAll('.drop-zone').forEach(drop => {
     if (!drop.dataset.filled) return;
-    if (drop.dataset.filled === drop.dataset.target) {
+    
+    // Get the word content from the filled chip
+    const filledChip = document.getElementById('chip_' + drop.dataset.filled);
+    const filledWord = filledChip ? filledChip.textContent : '';
+    
+    // Get the correct answer from the data
+    const targetItem = currentData.find(item => item.id === drop.dataset.target);
+    const correctWord = targetItem ? targetItem.answer : '';
+    
+    // Compare the actual words, not the chip IDs
+    if (filledWord === correctWord) {
       drop.classList.add('correct'); drop.classList.remove('incorrect'); correct++;
     } else {
       drop.classList.add('incorrect'); drop.classList.remove('correct');
