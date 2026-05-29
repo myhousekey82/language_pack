@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grammar Master Exercise</title>
+<title>Grammar Exercise Hub</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: #f4f6fb; color: #222; min-height: 100vh; }
@@ -26,45 +26,59 @@
   .page-header h1 { font-size: 22px; font-weight: 700; }
   .page-header p { font-size: 14px; margin-top: 4px; opacity: 0.85; }
 
-  .difficulty-selector {
+  .container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Main Menu */
+  .welcome-screen {
     background: white;
-    border-bottom: 2px solid #dde3ef;
-    padding: 20px 28px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 40px 32px;
+    text-align: center;
   }
-  .difficulty-selector label { font-size: 15px; font-weight: 600; color: #333; }
+  .welcome-screen h2 { font-size: 28px; color: #1a56a0; margin-bottom: 16px; }
+  .welcome-screen p { font-size: 15px; line-height: 1.8; color: #666; margin-bottom: 32px; }
+  .difficulty-buttons { display: flex; flex-direction: column; gap: 12px; }
   .diff-btn {
     background: white;
     color: #1a56a0;
     border: 2px solid #1a56a0;
-    border-radius: 7px;
-    padding: 10px 24px;
-    font-size: 14px;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.2s;
+    text-align: left;
   }
   .diff-btn:hover { background: #e8f0fe; }
-  .diff-btn.active { background: #1a56a0; color: white; }
-  .start-btn {
-    background: #34a853;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    padding: 10px 28px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-left: auto;
-    transition: background 0.15s;
+
+  /* Difficulty Selection / Exercise Selection */
+  .selection-screen {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 32px;
   }
-  .start-btn:hover { background: #2d9248; }
+  .selection-screen h2 { font-size: 24px; color: #1a56a0; margin-bottom: 24px; }
+  .exercise-list { display: flex; flex-direction: column; gap: 12px; }
+  .exercise-card {
+    background: #f8f9fa;
+    border: 2px solid #dde3ef;
+    border-radius: 8px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .exercise-card:hover { background: #e8f0fe; border-color: #1a56a0; }
+  .exercise-card h3 { font-size: 17px; color: #1a56a0; margin-bottom: 6px; }
+  .exercise-card p { font-size: 13px; color: #666; line-height: 1.5; }
 
-  .layout { display: flex; gap: 0; min-height: calc(100vh - 150px); }
-
+  /* Exercise Interface */
+  .layout { display: flex; gap: 0; min-height: calc(100vh - 70px); }
   .sidebar {
     width: 220px;
     min-width: 220px;
@@ -96,7 +110,6 @@
   .chip.used { display: none; }
 
   .main { flex: 1; padding: 24px 32px; max-width: 780px; }
-  .main.hidden { display: none; }
 
   .instructions {
     background: #e8f0fe;
@@ -167,37 +180,6 @@
   .btn-new:hover { background: #2d9248; }
   .score-msg { font-size: 15px; font-weight: 600; color: #1a56a0; }
 
-  .welcome-screen {
-    max-width: 600px;
-    margin: 60px auto;
-    padding: 32px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    text-align: center;
-  }
-  .welcome-screen h2 { font-size: 24px; color: #1a56a0; margin-bottom: 16px; }
-  .welcome-screen p { font-size: 15px; line-height: 1.8; color: #555; margin-bottom: 24px; }
-  .welcome-screen .levels {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 28px;
-  }
-  .level-card {
-    background: #f8f9fa;
-    border: 2px solid #dde3ef;
-    border-radius: 8px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-  }
-  .level-card:hover { background: #e8f0fe; border-color: #1a56a0; }
-  .level-card.selected { background: #e8f0fe; border-color: #1a56a0; }
-  .level-card h3 { font-size: 17px; color: #1a56a0; margin-bottom: 6px; }
-  .level-card p { font-size: 13px; color: #666; line-height: 1.5; }
-
   canvas#confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
 </style>
 </head>
@@ -210,351 +192,537 @@
     <button class="nav-btn" onclick="goToMainMenu()">⌂ Main Menu</button>
   </div>
   <div class="header-title">
-    <h1>🎯 Grammar Master Exercise</h1>
-    <p>Practice all parts of speech with shuffled exercises at your chosen difficulty level</p>
+    <h1 id="headerTitle">🎯 Grammar Exercise Hub</h1>
+    <p id="headerSubtitle">Choose a difficulty level to get started</p>
   </div>
 </div>
 
-<div class="welcome-screen" id="welcomeScreen">
-  <h2>Choose Your Difficulty Level</h2>
-  <p>Each level contains 25 sentences covering all parts of speech. The exercises shuffle every time you start, so you can practice multiple times without memorizing answers.</p>
-  
-  <div class="levels">
-    <div class="level-card" onclick="selectLevel('easy')">
-      <h3>🟢 Easy Level</h3>
-      <p>Common vocabulary, clear context clues, straightforward sentence structures</p>
-    </div>
-    <div class="level-card" onclick="selectLevel('medium')">
-      <h3>🟡 Medium Level</h3>
-      <p>Mixed vocabulary, some tricky conjunctions and prepositions, moderate complexity</p>
-    </div>
-    <div class="level-card" onclick="selectLevel('hard')">
-      <h3>🔴 Hard Level</h3>
-      <p>Advanced vocabulary, subtle distinctions, complex sentence structures</p>
+<!-- MAIN MENU SCREEN -->
+<div class="screen active" id="mainMenuScreen">
+  <div class="container">
+    <div class="welcome-screen">
+      <h2>Grammar Exercise Hub</h2>
+      <p>Practice all parts of speech with interactive exercises. Choose your difficulty level to begin.</p>
+      <div class="difficulty-buttons">
+        <button class="diff-btn" onclick="selectDifficulty('easy')">🟢 Easy Level</button>
+        <button class="diff-btn" onclick="selectDifficulty('medium')">🟡 Medium Level</button>
+        <button class="diff-btn" onclick="selectDifficulty('hard')">🔴 Hard Level</button>
+      </div>
     </div>
   </div>
-  
-  <button class="start-btn" id="startBtn" onclick="startExercise()" style="margin-top: 24px; display: none;">Start Exercise →</button>
 </div>
 
-<div class="layout" id="exerciseLayout" style="display: none;">
-  <div class="sidebar">
-    <h2>Word Bank</h2>
-    <div class="word-bank" id="wordBank"></div>
+<!-- EXERCISE SELECTION SCREEN -->
+<div class="screen" id="exerciseSelectionScreen">
+  <div class="container">
+    <div class="selection-screen">
+      <h2 id="difficultyTitle">Easy Level Exercises</h2>
+      <div class="exercise-list">
+        <div class="exercise-card" onclick="launchExercise('grammar-master')">
+          <h3>📝 Grammar Master</h3>
+          <p>Fill in the blank with the correct word. Test your vocabulary and grammar across all parts of speech.</p>
+        </div>
+        <div class="exercise-card" onclick="launchExercise('part-of-speech')">
+          <h3>🏷️ Part of Speech Identifier</h3>
+          <p>Identify the correct part of speech for each blank. Strengthen your grammatical analysis skills.</p>
+        </div>
+      </div>
+      <button class="btn-reset" onclick="backToDifficulty()" style="margin-top: 24px; width: 100%;">← Back to Difficulty Select</button>
+    </div>
   </div>
+</div>
 
-  <div class="main">
-    <div class="instructions">
-      📌 Each sentence is missing one word. Drag the correct word from the word bank into the blank. Click a filled blank to return the word to the bank. Each word is used only once.
+<!-- EXERCISE INTERFACE -->
+<div class="screen" id="exerciseScreen">
+  <div class="layout">
+    <div class="sidebar">
+      <h2 id="sidebarTitle">Word Bank</h2>
+      <div class="word-bank" id="wordBank"></div>
     </div>
 
-    <div class="sentences" id="sentences"></div>
+    <div class="main">
+      <div class="instructions" id="instructions">
+        📌 Instructions here
+      </div>
 
-    <div class="controls">
-      <button class="btn-check" onclick="checkAnswers()">Check Answers</button>
-      <button class="btn-reset" onclick="resetAll()">Reset</button>
-      <button class="btn-new" onclick="newExercise()">New Exercise</button>
-      <span class="score-msg" id="scoreMsg"></span>
+      <div class="sentences" id="sentences"></div>
+
+      <div class="controls">
+        <button class="btn-check" onclick="checkAnswers()">Check Answers</button>
+        <button class="btn-reset" onclick="resetAll()">Reset</button>
+        <button class="btn-new" onclick="newExercise()">New Exercise</button>
+        <span class="score-msg" id="scoreMsg"></span>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-const easyDataSets = [
-  // Set A (original)
-  [
-    { before: "She went", after: "the store to buy milk.", answer: "to", id: "e1" },
-    { before: "The meeting was", after: "because everyone participated.", answer: "productive", id: "e2" },
-    { before: "He", after: "his homework before dinner.", answer: "finished", id: "e3" },
-    { before: "They arrived", after: "despite the heavy traffic.", answer: "early", id: "e4" },
-    { before: "I like coffee,", after: "I prefer tea in the morning.", answer: "but", id: "e5" },
-    { before: "The cat is sleeping", after: "the sofa.", answer: "on", id: "e6" },
-    { before: "She speaks", answer: "fluently", after: "even though English is her second language.", id: "e7" },
-    { before: "The project was", after: "completed on time.", answer: "successfully", id: "e8" },
-    { before: "He", after: "a new job last month.", answer: "started", id: "e9" },
-    { before: "The presentation was very", after: "and everyone understood the topic.", answer: "clear", id: "e10" },
-    { before: "We stayed home", after: "it was raining.", answer: "because", id: "e11" },
-    { before: "She walked", after: "the park every morning.", answer: "through", id: "e12" },
-    { before: "The food tastes", after: "with these fresh ingredients.", answer: "delicious", id: "e13" },
-    { before: "He", after: "three languages fluently.", answer: "speaks", id: "e14" },
-    { before: "They worked", after: "to finish the report by Friday.", answer: "hard", id: "e15" },
-    { before: "I will go shopping", after: "I finish work.", answer: "after", id: "e16" },
-    { before: "The book is", after: "the table.", answer: "under", id: "e17" },
-    { before: "She is a very", after: "teacher who cares about her students.", answer: "dedicated", id: "e18" },
-    { before: "We", after: "at the restaurant last night.", answer: "ate", id: "e19" },
-    { before: "He answered the question", after: "without any hesitation.", answer: "confidently", id: "e20" },
-    { before: "You can have tea", after: "coffee — whichever you prefer.", answer: "or", id: "e21" },
-    { before: "The office is located", after: "Main Street.", answer: "on", id: "e22" },
-    { before: "It was a", after: "day, perfect for a picnic.", answer: "beautiful", id: "e23" },
-    { before: "She", after: "to the email immediately after reading it.", answer: "replied", id: "e24" },
-    { before: "He worked", after: "on the project until it was perfect.", answer: "carefully", id: "e25" }
-  ],
-  // Set B (new)
-  [
-    { before: "The children", after: "in the playground after school.", answer: "played", id: "eb1" },
-    { before: "She is", after: "intelligent and always asks good questions.", answer: "very", id: "eb2" },
-    { before: "We can meet", after: "Monday or Tuesday.", answer: "on", id: "eb3" },
-    { before: "The weather was", after: ", so we cancelled the outdoor event.", answer: "terrible", id: "eb4" },
-    { before: "He", after: "his keys at home and had to go back.", answer: "forgot", id: "eb5" },
-    { before: "I enjoy reading", after: "I have free time.", answer: "when", id: "eb6" },
-    { before: "The package arrived", after: "the mailbox this morning.", answer: "in", id: "eb7" },
-    { before: "She smiled", after: "at the good news.", answer: "happily", id: "eb8" },
-    { before: "The movie was", after: "entertaining and we all enjoyed it.", answer: "quite", id: "eb9" },
-    { before: "He", after: "his friend with the moving project.", answer: "helped", id: "eb10" },
-    { before: "They decided", after: "stay longer because they were having fun.", answer: "to", id: "eb11" },
-    { before: "The company is", after: "new office space next month.", answer: "opening", id: "eb12" },
-    { before: "She walked", after: "the street carefully.", answer: "across", id: "eb13" },
-    { before: "I will", after: "you tomorrow with the details.", answer: "call", id: "eb14" },
-    { before: "The weather is", after: "today, so bring an umbrella.", answer: "rainy", id: "eb15" },
-    { before: "He spoke", after: "during the entire presentation.", answer: "clearly", id: "eb16" },
-    { before: "The children ran", after: "the field playing tag.", answer: "through", id: "eb17" },
-    { before: "She is", after: "at math and science.", answer: "skilled", id: "eb18" },
-    { before: "We", after: "coffee and discussed the project.", answer: "had", id: "eb19" },
-    { before: "The instructions are", after: "to follow and understand.", answer: "easy", id: "eb20" },
-    { before: "He arrived", after: "the office at 8 AM sharp.", answer: "at", id: "eb21" },
-    { before: "The meeting will be", after: "successful with proper planning.", answer: "very", id: "eb22" },
-    { before: "She listens", after: "when others are speaking.", answer: "carefully", id: "eb23" },
-    { before: "I need", after: "finish this task before leaving.", answer: "to", id: "eb24" },
-    { before: "The sunset was", after: "and peaceful to watch.", answer: "beautiful", id: "eb25" }
-  ],
-  // Set C (new)
-  [
-    { before: "He works", after: "a large company downtown.", answer: "for", id: "ec1" },
-    { before: "The team played", after: "and won the match.", answer: "well", id: "ec2" },
-    { before: "She", after: "the door before leaving the house.", answer: "locked", id: "ec3" },
-    { before: "I am", after: "about the upcoming vacation.", answer: "excited", id: "ec4" },
-    { before: "The flowers are growing", after: "the garden nicely.", answer: "in", id: "ec5" },
-    { before: "He answered the phone", after: "the third ring.", answer: "on", id: "ec6" },
-    { before: "She travels", after: "train whenever possible.", answer: "by", id: "ec7" },
-    { before: "The work was", after: "but we completed it on schedule.", answer: "difficult", id: "ec8" },
-    { before: "They", after: "lunch together at the cafe.", answer: "had", id: "ec9" },
-    { before: "I prefer", after: "working early in the morning.", answer: "to", id: "ec10" },
-    { before: "The news was", after: ", so we celebrated.", answer: "good", id: "ec11" },
-    { before: "She", after: "the window to get fresh air.", answer: "opened", id: "ec12" },
-    { before: "He responded", after: "to every email within an hour.", answer: "promptly", id: "ec13" },
-    { before: "The class is", after: "interesting and educational.", answer: "very", id: "ec14" },
-    { before: "We stopped", after: "the store to buy supplies.", answer: "at", id: "ec15" },
-    { before: "I can't go because", after: "I have other commitments.", answer: "I", id: "ec16" },
-    { before: "She danced", after: "with joy at the celebration.", answer: "happily", id: "ec17" },
-    { before: "The path leads", after: "the forest and valley.", answer: "through", id: "ec18" },
-    { before: "He", after: "the puzzle quickly and easily.", answer: "solved", id: "ec19" },
-    { before: "The service was", after: "excellent and very professional.", answer: "quite", id: "ec20" },
-    { before: "She sat", after: "the bench looking out at the view.", answer: "on", id: "ec21" },
-    { before: "I walk", after: "the park every day.", answer: "through", id: "ec22" },
-    { before: "The story is", after: "and keeps you interested throughout.", answer: "engaging", id: "ec23" },
-    { before: "He", after: "his success to hard work.", answer: "attributed", id: "ec24" },
-    { before: "We met", after: "the coffee shop to discuss plans.", answer: "at", id: "ec25" }
-  ]
-];
-
-const mediumDataSets = [
-  // Set A (original)
-  [
-    { before: "She completed the task", after: "being interrupted several times.", answer: "despite", id: "m1" },
-    { before: "The results were", after: "better than anyone had expected.", answer: "significantly", id: "m2" },
-    { before: "He", after: "the problem before anyone else noticed it.", answer: "identified", id: "m3" },
-    { before: "They moved to the city", after: "better job opportunities.", answer: "for", id: "m4" },
-    { before: "She responded", after: "to the criticism during the meeting.", answer: "calmly", id: "m5" },
-    { before: "I'll attend the conference", after: "the cost is reasonable.", answer: "if", id: "m6" },
-    { before: "The solution seemed", after: ", but it turned out to be quite complex.", answer: "simple", id: "m7" },
-    { before: "He", after: "his opinion clearly during the discussion.", answer: "expressed", id: "m8" },
-    { before: "The team worked", after: "to meet the tight deadline.", answer: "efficiently", id: "m9" },
-    { before: "She walked", after: "the corridor looking for the conference room.", answer: "along", id: "m10" },
-    { before: "The project was challenging,", after: "we managed to complete it successfully.", answer: "nevertheless", id: "m11" },
-    { before: "His explanation was", after: "enough for everyone to understand.", answer: "thorough", id: "m12" },
-    { before: "They", after: "a new approach to solve the recurring problem.", answer: "implemented", id: "m13" },
-    { before: "She arrived", after: "everyone else had already left.", answer: "after", id: "m14" },
-    { before: "The instructions were", after: "written and easy to follow.", answer: "clearly", id: "m15" },
-    { before: "He postponed the meeting", after: "the key participant was unavailable.", answer: "since", id: "m16" },
-    { before: "The building is located", after: "the intersection of two major roads.", answer: "at", id: "m17" },
-    { before: "Her presentation was", after: "and captured everyone's attention.", answer: "compelling", id: "m18" },
-    { before: "We", after: "the data carefully before making our decision.", answer: "analyzed", id: "m19" },
-    { before: "The team performed", after: "under difficult circumstances.", answer: "admirably", id: "m20" },
-    { before: "You should review the contract", after: "signing it.", answer: "before", id: "m21" },
-    { before: "The documents are", after: "the locked cabinet for security.", answer: "in", id: "m22" },
-    { before: "It was an", after: "decision that affected the entire department.", answer: "important", id: "m23" },
-    { before: "She", after: "the proposal with strong supporting evidence.", answer: "defended", id: "m24" },
-    { before: "He spoke", after: "about his concerns during the meeting.", answer: "frankly", id: "m25" }
-  ],
-  // Set B (new)
-  [
-    { before: "The client asked us to", after: "the timeline by two weeks.", answer: "extend", id: "mb1" },
-    { before: "She handled the difficult situation", after: "remarkable composure and professionalism.", answer: "with", id: "mb2" },
-    { before: "He", after: "the error in the report and corrected it immediately.", answer: "discovered", id: "mb3" },
-    { before: "The proposal was rejected", after: "it didn't meet the budget requirements.", answer: "because", id: "mb4" },
-    { before: "They worked", after: "midnight to finish the project.", answer: "until", id: "mb5" },
-    { before: "I would support the plan", after: "we have more information.", answer: "if", id: "mb6" },
-    { before: "The new policy is", after: "but necessary for compliance.", answer: "unpopular", id: "mb7" },
-    { before: "She", after: "the meeting effectively despite the disruptions.", answer: "managed", id: "mb8" },
-    { before: "The team collaborated", after: "to achieve the goal.", answer: "seamlessly", id: "mb9" },
-    { before: "He walked", after: "the conference room to find a quiet space.", answer: "past", id: "mb10" },
-    { before: "The budget was exceeded,", after: "the outcome justified the expense.", answer: "yet", id: "mb11" },
-    { before: "Her analysis was", after: "detailed and provided valuable insights.", answer: "remarkably", id: "mb12" },
-    { before: "They", after: "the new software system last week.", answer: "deployed", id: "mb13" },
-    { before: "She requested additional resources", after: "the complexity of the assignment.", answer: "due to", id: "mb14" },
-    { before: "The feedback was", after: "delivered in a constructive manner.", answer: "honest", id: "mb15" },
-    { before: "He", after: "responsibility for the entire project team.", answer: "assumed", id: "mb16" },
-    { before: "The strategic plan is centered", after: "customer satisfaction.", answer: "on", id: "mb17" },
-    { before: "Her performance review was", after: "positive with areas for growth.", answer: "quite", id: "mb18" },
-    { before: "We", after: "the financial statements thoroughly.", answer: "reviewed", id: "mb19" },
-    { before: "The initiative proved", after: "successful in reducing operational costs.", answer: "remarkably", id: "mb20" },
-    { before: "You must submit the proposal", after: "next Friday.", answer: "by", id: "mb21" },
-    { before: "The records are stored", after: "the filing system in the basement.", answer: "in", id: "mb22" },
-    { before: "It was a", after: "opportunity that came at the right time.", answer: "timely", id: "mb23" },
-    { before: "She", after: "her vision for the company with passion.", answer: "communicated", id: "mb24" },
-    { before: "He contributed", after: "to the discussion with relevant examples.", answer: "meaningfully", id: "mb25" }
-  ],
-  // Set C (new)
-  [
-    { before: "The company decided to", after: "its operations to new markets.", answer: "expand", id: "mc1" },
-    { before: "She presented the findings", after: "clarity and precision.", answer: "with", id: "mc2" },
-    { before: "He", after: "the task methodically without rushing.", answer: "approached", id: "mc3" },
-    { before: "The merger was approved", after: "it met all regulatory requirements.", answer: "since", id: "mc4" },
-    { before: "They waited", after: "the report was finalized.", answer: "until", id: "mc5" },
-    { before: "I would consider the offer", after: "the salary is competitive.", answer: "if", id: "mc6" },
-    { before: "The outcome was disappointing,", after: "the team learned valuable lessons.", answer: "yet", id: "mc7" },
-    { before: "She", after: "the risks carefully before proceeding.", answer: "assessed", id: "mc8" },
-    { before: "The developers worked", after: "to deliver the software on schedule.", answer: "diligently", id: "mc9" },
-    { before: "He walked", after: "the office looking troubled.", answer: "through", id: "mc10" },
-    { before: "The strategy is effective,", after: "it requires ongoing adjustment.", answer: "although", id: "mc11" },
-    { before: "Her argument was", after: "supported by empirical evidence.", answer: "well", id: "mc12" },
-    { before: "They", after: "the contract with all major stakeholders.", answer: "signed", id: "mc13" },
-    { before: "She proposed the idea", after: "the board meeting last month.", answer: "at", id: "mc14" },
-    { before: "The solution was", after: "innovative and cost-effective.", answer: "truly", id: "mc15" },
-    { before: "He", after: "the challenge with determination.", answer: "confronted", id: "mc16" },
-    { before: "The initiative focused", after: "improving employee engagement.", answer: "on", id: "mc17" },
-    { before: "Her leadership style was", after: "characterized by transparency and trust.", answer: "notably", id: "mc18" },
-    { before: "We", after: "the proposal thoroughly before committing resources.", answer: "evaluated", id: "mc19" },
-    { before: "The transformation proved", after: "effective in achieving our objectives.", answer: "remarkably", id: "mc20" },
-    { before: "You should complete the assessment", after: "the end of the month.", answer: "by", id: "mc21" },
-    { before: "The information is kept", after: "the secure database.", answer: "in", id: "mc22" },
-    { before: "It was a", after: "moment when the team finally succeeded.", answer: "triumphant", id: "mc23" },
-    { before: "She", after: "the importance of collaboration to the group.", answer: "emphasized", id: "mc24" },
-    { before: "He responded", after: "with detailed and helpful feedback.", answer: "promptly", id: "mc25" }
-  ]
-];
-
-const hardDataSets = [
-  // Set A (original)
-  [
-    { before: "She handed in the report", after: "the deadline, even though she had barely slept.", answer: "before", id: "h1" },
-    { before: "The presentation was", after: "— three hours of data and no coffee break.", answer: "exhausting", id: "h2" },
-    { before: "He", after: "on finishing the project alone, even when his teammates offered to help.", answer: "insisted", id: "h3" },
-    { before: "The new policy affects everyone", after: "their role or department.", answer: "regardless", id: "h4" },
-    { before: "She", after: "agreed to the terms, but her body language told a different story.", answer: "reluctantly", id: "h5" },
-    { before: "The manager postponed the meeting", after: "there were still too many unresolved issues.", answer: "because", id: "h6" },
-    { before: "Living", after: "a foreign country teaches you a great deal about yourself.", answer: "in", id: "h7" },
-    { before: "The results were", after: "impressive, given how little time they had to prepare.", answer: "surprisingly", id: "h8" },
-    { before: "He", after: "the mistake immediately but didn't know how to fix it.", answer: "noticed", id: "h9" },
-    { before: "The instructions were so", after: "that even experienced users made errors.", answer: "confusing", id: "h10" },
-    { before: "She walked", after: "the crowded market without stopping to look at anything.", answer: "through", id: "h11" },
-    { before: "I would love to accept your offer,", after: "I've already made other plans.", answer: "however", id: "h12" },
-    { before: "The team", after: "the launch date by two weeks due to technical problems.", answer: "postponed", id: "h13" },
-    { before: "He speaks so", after: "that it's hard to follow him in a conversation.", answer: "rapidly", id: "h14" },
-    { before: "It was an", after: "opportunity — one she knew she couldn't afford to miss.", answer: "extraordinary", id: "h15" },
-    { before: "The letter had been sitting", after: "her desk for three days before she opened it.", answer: "on", id: "h16" },
-    { before: "She studied every night", after: "she still didn't feel confident before the exam.", answer: "but", id: "h17" },
-    { before: "The children", after: "heavily on their teacher for guidance during the difficult weeks.", answer: "relied", id: "h18" },
-    { before: "The film was", after: "different from what the trailer had suggested.", answer: "completely", id: "h19" },
-    { before: "He gave a", after: "account of everything that had happened that evening.", answer: "detailed", id: "h20" },
-    { before: "She moved to a new city", after: "having no friends or family there.", answer: "despite", id: "h21" },
-    { before: "The amount of work was", after: ", and several team members asked for extra support.", answer: "overwhelming", id: "h22" },
-    { before: "He", after: "his involvement in the incident after seeing the security footage.", answer: "admitted", id: "h23" },
-    { before: "The view from the top of the hill was so", after: "that nobody wanted to leave.", answer: "beautiful", id: "h24" },
-    { before: "She had", after: "enough time to review her notes before the interview began.", answer: "barely", id: "h25" }
-  ],
-  // Set B (new)
-  [
-    { before: "The consultant's report was", after: "critical of the current management structure.", answer: "scathing", id: "hb1" },
-    { before: "He approached the challenge", after: "a combination of innovation and pragmatism.", answer: "with", id: "hb2" },
-    { before: "She", after: "the underlying assumptions of the original proposal.", answer: "questioned", id: "hb3" },
-    { before: "The initiative, while well-intentioned,", after: "numerous unintended consequences.", answer: "created", id: "hb4" },
-    { before: "They argued", after: "the point so extensively that no consensus was reached.", answer: "about", id: "hb5" },
-    { before: "The document was", after: "ambiguous in its interpretation of the clause.", answer: "deliberately", id: "hb6" },
-    { before: "She maintained her composure", after: "the prolonged criticism.", answer: "throughout", id: "hb7" },
-    { before: "He", after: "a sophisticated understanding of the market dynamics.", answer: "demonstrated", id: "hb8" },
-    { before: "The strategy, while risky,", after: "the organization's long-term sustainability.", answer: "ensures", id: "hb9" },
-    { before: "She navigated", after: "the bureaucratic maze with remarkable efficiency.", answer: "through", id: "hb10" },
-    { before: "I found his argument", after: "unconvincing, despite his credentials.", answer: "ultimately", id: "hb11" },
-    { before: "The proposal was criticized", after: "being overly ambitious and under-resourced.", answer: "for", id: "hb12" },
-    { before: "They", after: "the decision despite significant opposition.", answer: "implemented", id: "hb13" },
-    { before: "She articulated her position", after: "remarkable clarity and conviction.", answer: "with", id: "hb14" },
-    { before: "The analysis, though comprehensive,", after: "several critical variables.", answer: "overlooked", id: "hb15" },
-    { before: "He", after: "his colleagues of the necessity for radical change.", answer: "convinced", id: "hb16" },
-    { before: "The framework evolved", after: "the project progressed.", answer: "as", id: "hb17" },
-    { before: "Her methodology was", after: "rigorous and yielded unexpected insights.", answer: "exceptionally", id: "hb18" },
-    { before: "We", after: "the risks inherent in pursuing this direction.", answer: "underestimated", id: "hb19" },
-    { before: "The transformation was", after: "gradual, occurring over several fiscal quarters.", answer: "deliberately", id: "hb20" },
-    { before: "You should", after: "the fine print before committing to the agreement.", answer: "scrutinize", id: "hb21" },
-    { before: "The discrepancies were found", after: "the archived files.", answer: "within", id: "hb22" },
-    { before: "It was an", after: "discovery that challenged our fundamental assumptions.", answer: "unsettling", id: "hb23" },
-    { before: "She", after: "the complexity of the situation with nuance and wisdom.", answer: "acknowledged", id: "hb24" },
-    { before: "He proceeded", after: "with unexpected caution and deliberation.", answer: "nonetheless", id: "hb25" }
-  ],
-  // Set C (new)
-  [
-    { before: "The framework was designed to", after: "ambiguity and promote consistency across departments.", answer: "eliminate", id: "hc1" },
-    { before: "She analyzed the problem", after: "the lens of multiple stakeholder perspectives.", answer: "through", id: "hc2" },
-    { before: "He", after: "the validity of previous conclusions.", answer: "questioned", id: "hc3" },
-    { before: "The initiative encountered resistance,", after: "it addressed a genuine organizational need.", answer: "although", id: "hc4" },
-    { before: "They deliberated", after: "the proposal with meticulous attention to detail.", answer: "on", id: "hc5" },
-    { before: "The strategy proved", after: "counterintuitive, yet remarkably effective.", answer: "rather", id: "hc6" },
-    { before: "She persisted", after: "the setbacks and maintained her focus on the goal.", answer: "despite", id: "hc7" },
-    { before: "He", after: "an innovative solution that others had overlooked.", answer: "devised", id: "hc8" },
-    { before: "The outcome, while favorable,", after: "unexpected complexities in execution.", answer: "revealed", id: "hc9" },
-    { before: "She maneuvered", after: "the competing interests with diplomatic skill.", answer: "between", id: "hc10" },
-    { before: "I recognized the merit in her argument,", after: "I remained skeptical of the implementation.", answer: "yet", id: "hc11" },
-    { before: "The proposal was rejected", after: "insufficient evidence to support its feasibility.", answer: "due to", id: "hc12" },
-    { before: "They", after: "the new framework with considerable success.", answer: "adopted", id: "hc13" },
-    { before: "She conveyed her concerns", after: "a carefully calibrated presentation.", answer: "via", id: "hc14" },
-    { before: "The analysis revealed patterns", after: "previously unnoticed in the data.", answer: "that", id: "hc15" },
-    { before: "He", after: "the complexity of the situation without oversimplifying.", answer: "articulated", id: "hc16" },
-    { before: "The initiative centered", after: "the principles of transparency and accountability.", answer: "upon", id: "hc17" },
-    { before: "Her assessment was", after: "insightful and influenced the final decision.", answer: "profoundly", id: "hc18" },
-    { before: "We", after: "the implications of the proposed changes.", answer: "contemplated", id: "hc19" },
-    { before: "The shift was", after: "significant and warranted careful monitoring.", answer: "sufficiently", id: "hc20" },
-    { before: "You must", after: "every assumption before proceeding.", answer: "validate", id: "hc21" },
-    { before: "The evidence was buried", after: "mountains of contradictory data.", answer: "beneath", id: "hc22" },
-    { before: "It was a", after: "moment when the organization finally achieved consensus.", id: "hc23", answer: "pivotal" },
-    { before: "She", after: "her position with irrefutable logic and evidence.", answer: "substantiated", id: "hc24" },
-    { before: "He acted", after: "deliberate foresight regarding potential pitfalls.", answer: "with", id: "hc25" }
-  ]
-];
-
-let currentLevel = null;
+let currentScreen = 'mainMenu';
+let currentDifficulty = null;
+let currentExercise = null;
 let currentData = [];
 let selectedChip = null;
 
-function selectLevel(level) {
-  currentLevel = level;
-  document.querySelectorAll('.level-card').forEach(card => card.classList.remove('selected'));
-  event.target.closest('.level-card').classList.add('selected');
-  document.getElementById('startBtn').style.display = 'block';
+// ==================== GRAMMAR MASTER DATA ====================
+
+const grammarMasterDataSets = {
+  easy: [
+    [
+      { before: "She went", after: "the store to buy milk.", answer: "to", id: "e1" },
+      { before: "The meeting was", after: "because everyone participated.", answer: "productive", id: "e2" },
+      { before: "He", after: "his homework before dinner.", answer: "finished", id: "e3" },
+      { before: "They arrived", after: "despite the heavy traffic.", answer: "early", id: "e4" },
+      { before: "I like coffee,", after: "I prefer tea in the morning.", answer: "but", id: "e5" },
+      { before: "The cat is sleeping", after: "the sofa.", answer: "on", id: "e6" },
+      { before: "She speaks", answer: "fluently", after: "even though English is her second language.", id: "e7" },
+      { before: "The project was", after: "completed on time.", answer: "successfully", id: "e8" },
+      { before: "He", after: "a new job last month.", answer: "started", id: "e9" },
+      { before: "The presentation was very", after: "and everyone understood the topic.", answer: "clear", id: "e10" },
+      { before: "We stayed home", after: "it was raining.", answer: "because", id: "e11" },
+      { before: "She walked", after: "the park every morning.", answer: "through", id: "e12" },
+      { before: "The food tastes", after: "with these fresh ingredients.", answer: "delicious", id: "e13" },
+      { before: "He", after: "three languages fluently.", answer: "speaks", id: "e14" },
+      { before: "They worked", after: "to finish the report by Friday.", answer: "hard", id: "e15" },
+      { before: "I will go shopping", after: "I finish work.", answer: "after", id: "e16" },
+      { before: "The book is", after: "the table.", answer: "under", id: "e17" },
+      { before: "She is a very", after: "teacher who cares about her students.", answer: "dedicated", id: "e18" },
+      { before: "We", after: "at the restaurant last night.", answer: "ate", id: "e19" },
+      { before: "He answered the question", after: "without any hesitation.", answer: "confidently", id: "e20" },
+      { before: "You can have tea", after: "coffee — whichever you prefer.", answer: "or", id: "e21" },
+      { before: "The office is located", after: "Main Street.", answer: "on", id: "e22" },
+      { before: "It was a", after: "day, perfect for a picnic.", answer: "beautiful", id: "e23" },
+      { before: "She", after: "to the email immediately after reading it.", answer: "replied", id: "e24" },
+      { before: "He worked", after: "on the project until it was perfect.", answer: "carefully", id: "e25" }
+    ],
+    [
+      { before: "The children", after: "in the playground after school.", answer: "played", id: "eb1" },
+      { before: "She is", after: "intelligent and always asks good questions.", answer: "very", id: "eb2" },
+      { before: "We can meet", after: "Monday or Tuesday.", answer: "on", id: "eb3" },
+      { before: "The weather was", after: ", so we cancelled the outdoor event.", answer: "terrible", id: "eb4" },
+      { before: "He", after: "his keys at home and had to go back.", answer: "forgot", id: "eb5" },
+      { before: "I enjoy reading", after: "I have free time.", answer: "when", id: "eb6" },
+      { before: "The package arrived", after: "the mailbox this morning.", answer: "in", id: "eb7" },
+      { before: "She smiled", after: "at the good news.", answer: "happily", id: "eb8" },
+      { before: "The movie was", after: "entertaining and we all enjoyed it.", answer: "quite", id: "eb9" },
+      { before: "He", after: "his friend with the moving project.", answer: "helped", id: "eb10" },
+      { before: "They decided", after: "stay longer because they were having fun.", answer: "to", id: "eb11" },
+      { before: "The company is", after: "new office space next month.", answer: "opening", id: "eb12" },
+      { before: "She walked", after: "the street carefully.", answer: "across", id: "eb13" },
+      { before: "I will", after: "you tomorrow with the details.", answer: "call", id: "eb14" },
+      { before: "The weather is", after: "today, so bring an umbrella.", answer: "rainy", id: "eb15" },
+      { before: "He spoke", after: "during the entire presentation.", answer: "clearly", id: "eb16" },
+      { before: "The children ran", after: "the field playing tag.", answer: "through", id: "eb17" },
+      { before: "She is", after: "at math and science.", answer: "skilled", id: "eb18" },
+      { before: "We", after: "coffee and discussed the project.", answer: "had", id: "eb19" },
+      { before: "The instructions are", after: "to follow and understand.", answer: "easy", id: "eb20" },
+      { before: "He arrived", after: "the office at 8 AM sharp.", answer: "at", id: "eb21" },
+      { before: "The meeting will be", after: "successful with proper planning.", answer: "very", id: "eb22" },
+      { before: "She listens", after: "when others are speaking.", answer: "carefully", id: "eb23" },
+      { before: "I need", after: "finish this task before leaving.", answer: "to", id: "eb24" },
+      { before: "The sunset was", after: "and peaceful to watch.", answer: "beautiful", id: "eb25" }
+    ],
+    [
+      { before: "He works", after: "a large company downtown.", answer: "for", id: "ec1" },
+      { before: "The team played", after: "and won the match.", answer: "well", id: "ec2" },
+      { before: "She", after: "the door before leaving the house.", answer: "locked", id: "ec3" },
+      { before: "I am", after: "about the upcoming vacation.", answer: "excited", id: "ec4" },
+      { before: "The flowers are growing", after: "the garden nicely.", answer: "in", id: "ec5" },
+      { before: "He answered the phone", after: "the third ring.", answer: "on", id: "ec6" },
+      { before: "She travels", after: "train whenever possible.", answer: "by", id: "ec7" },
+      { before: "The work was", after: "but we completed it on schedule.", answer: "difficult", id: "ec8" },
+      { before: "They", after: "lunch together at the cafe.", answer: "had", id: "ec9" },
+      { before: "I prefer", after: "working early in the morning.", answer: "to", id: "ec10" },
+      { before: "The news was", after: ", so we celebrated.", answer: "good", id: "ec11" },
+      { before: "She", after: "the window to get fresh air.", answer: "opened", id: "ec12" },
+      { before: "He responded", after: "to every email within an hour.", answer: "promptly", id: "ec13" },
+      { before: "The class is", after: "interesting and educational.", answer: "very", id: "ec14" },
+      { before: "We stopped", after: "the store to buy supplies.", answer: "at", id: "ec15" },
+      { before: "I can't go because", after: "I have other commitments.", answer: "I", id: "ec16" },
+      { before: "She danced", after: "with joy at the celebration.", answer: "happily", id: "ec17" },
+      { before: "The path leads", after: "the forest and valley.", answer: "through", id: "ec18" },
+      { before: "He", after: "the puzzle quickly and easily.", answer: "solved", id: "ec19" },
+      { before: "The service was", after: "excellent and very professional.", answer: "quite", id: "ec20" },
+      { before: "She sat", after: "the bench looking out at the view.", answer: "on", id: "ec21" },
+      { before: "I walk", after: "the park every day.", answer: "through", id: "ec22" },
+      { before: "The story is", after: "and keeps you interested throughout.", answer: "engaging", id: "ec23" },
+      { before: "He", after: "his success to hard work.", answer: "attributed", id: "ec24" },
+      { before: "We met", after: "the coffee shop to discuss plans.", answer: "at", id: "ec25" }
+    ]
+  ],
+  medium: [
+    [
+      { before: "She completed the task", after: "being interrupted several times.", answer: "despite", id: "m1" },
+      { before: "The results were", after: "better than anyone had expected.", answer: "significantly", id: "m2" },
+      { before: "He", after: "the problem before anyone else noticed it.", answer: "identified", id: "m3" },
+      { before: "They moved to the city", after: "better job opportunities.", answer: "for", id: "m4" },
+      { before: "She responded", after: "to the criticism during the meeting.", answer: "calmly", id: "m5" },
+      { before: "I'll attend the conference", after: "the cost is reasonable.", answer: "if", id: "m6" },
+      { before: "The solution seemed", after: ", but it turned out to be quite complex.", answer: "simple", id: "m7" },
+      { before: "He", after: "his opinion clearly during the discussion.", answer: "expressed", id: "m8" },
+      { before: "The team worked", after: "to meet the tight deadline.", answer: "efficiently", id: "m9" },
+      { before: "She walked", after: "the corridor looking for the conference room.", answer: "along", id: "m10" },
+      { before: "The project was challenging,", after: "we managed to complete it successfully.", answer: "nevertheless", id: "m11" },
+      { before: "His explanation was", after: "enough for everyone to understand.", answer: "thorough", id: "m12" },
+      { before: "They", after: "a new approach to solve the recurring problem.", answer: "implemented", id: "m13" },
+      { before: "She arrived", after: "everyone else had already left.", answer: "after", id: "m14" },
+      { before: "The instructions were", after: "written and easy to follow.", answer: "clearly", id: "m15" },
+      { before: "He postponed the meeting", after: "the key participant was unavailable.", answer: "since", id: "m16" },
+      { before: "The building is located", after: "the intersection of two major roads.", answer: "at", id: "m17" },
+      { before: "Her presentation was", after: "and captured everyone's attention.", answer: "compelling", id: "m18" },
+      { before: "We", after: "the data carefully before making our decision.", answer: "analyzed", id: "m19" },
+      { before: "The team performed", after: "under difficult circumstances.", answer: "admirably", id: "m20" },
+      { before: "You should review the contract", after: "signing it.", answer: "before", id: "m21" },
+      { before: "The documents are", after: "the locked cabinet for security.", answer: "in", id: "m22" },
+      { before: "It was an", after: "decision that affected the entire department.", answer: "important", id: "m23" },
+      { before: "She", after: "the proposal with strong supporting evidence.", answer: "defended", id: "m24" },
+      { before: "He spoke", after: "about his concerns during the meeting.", answer: "frankly", id: "m25" }
+    ],
+    [
+      { before: "The client asked us to", after: "the timeline by two weeks.", answer: "extend", id: "mb1" },
+      { before: "She handled the difficult situation", after: "remarkable composure and professionalism.", answer: "with", id: "mb2" },
+      { before: "He", after: "the error in the report and corrected it immediately.", answer: "discovered", id: "mb3" },
+      { before: "The proposal was rejected", after: "it didn't meet the budget requirements.", answer: "because", id: "mb4" },
+      { before: "They worked", after: "midnight to finish the project.", answer: "until", id: "mb5" },
+      { before: "I would support the plan", after: "we have more information.", answer: "if", id: "mb6" },
+      { before: "The new policy is", after: "but necessary for compliance.", answer: "unpopular", id: "mb7" },
+      { before: "She", after: "the meeting effectively despite the disruptions.", answer: "managed", id: "mb8" },
+      { before: "The team collaborated", after: "to achieve the goal.", answer: "seamlessly", id: "mb9" },
+      { before: "He walked", after: "the conference room to find a quiet space.", answer: "past", id: "mb10" },
+      { before: "The budget was exceeded,", after: "the outcome justified the expense.", answer: "yet", id: "mb11" },
+      { before: "Her analysis was", after: "detailed and provided valuable insights.", answer: "remarkably", id: "mb12" },
+      { before: "They", after: "the new software system last week.", answer: "deployed", id: "mb13" },
+      { before: "She requested additional resources", after: "the complexity of the assignment.", answer: "due to", id: "mb14" },
+      { before: "The feedback was", after: "delivered in a constructive manner.", answer: "honest", id: "mb15" },
+      { before: "He", after: "responsibility for the entire project team.", answer: "assumed", id: "mb16" },
+      { before: "The strategic plan is centered", after: "customer satisfaction.", answer: "on", id: "mb17" },
+      { before: "Her performance review was", after: "positive with areas for growth.", answer: "quite", id: "mb18" },
+      { before: "We", after: "the financial statements thoroughly.", answer: "reviewed", id: "mb19" },
+      { before: "The initiative proved", after: "successful in reducing operational costs.", answer: "remarkably", id: "mb20" },
+      { before: "You must submit the proposal", after: "next Friday.", answer: "by", id: "mb21" },
+      { before: "The records are stored", after: "the filing system in the basement.", answer: "in", id: "mb22" },
+      { before: "It was a", after: "opportunity that came at the right time.", answer: "timely", id: "mb23" },
+      { before: "She", after: "her vision for the company with passion.", answer: "communicated", id: "mb24" },
+      { before: "He contributed", after: "to the discussion with relevant examples.", answer: "meaningfully", id: "mb25" }
+    ],
+    [
+      { before: "The company decided to", after: "its operations to new markets.", answer: "expand", id: "mc1" },
+      { before: "She presented the findings", after: "clarity and precision.", answer: "with", id: "mc2" },
+      { before: "He", after: "the task methodically without rushing.", answer: "approached", id: "mc3" },
+      { before: "The merger was approved", after: "it met all regulatory requirements.", answer: "since", id: "mc4" },
+      { before: "They waited", after: "the report was finalized.", answer: "until", id: "mc5" },
+      { before: "I would consider the offer", after: "the salary is competitive.", answer: "if", id: "mc6" },
+      { before: "The outcome was disappointing,", after: "the team learned valuable lessons.", answer: "yet", id: "mc7" },
+      { before: "She", after: "the risks carefully before proceeding.", answer: "assessed", id: "mc8" },
+      { before: "The developers worked", after: "to deliver the software on schedule.", answer: "diligently", id: "mc9" },
+      { before: "He walked", after: "the office looking troubled.", answer: "through", id: "mc10" },
+      { before: "The strategy is effective,", after: "it requires ongoing adjustment.", answer: "although", id: "mc11" },
+      { before: "Her argument was", after: "supported by empirical evidence.", answer: "well", id: "mc12" },
+      { before: "They", after: "the contract with all major stakeholders.", answer: "signed", id: "mc13" },
+      { before: "She proposed the idea", after: "the board meeting last month.", answer: "at", id: "mc14" },
+      { before: "The solution was", after: "innovative and cost-effective.", answer: "truly", id: "mc15" },
+      { before: "He", after: "the challenge with determination.", answer: "confronted", id: "mc16" },
+      { before: "The initiative focused", after: "improving employee engagement.", answer: "on", id: "mc17" },
+      { before: "Her leadership style was", after: "characterized by transparency and trust.", answer: "notably", id: "mc18" },
+      { before: "We", after: "the proposal thoroughly before committing resources.", answer: "evaluated", id: "mc19" },
+      { before: "The transformation proved", after: "effective in achieving our objectives.", answer: "remarkably", id: "mc20" },
+      { before: "You should complete the assessment", after: "the end of the month.", answer: "by", id: "mc21" },
+      { before: "The information is kept", after: "the secure database.", answer: "in", id: "mc22" },
+      { before: "It was a", after: "moment when the team finally succeeded.", answer: "triumphant", id: "mc23" },
+      { before: "She", after: "the importance of collaboration to the group.", answer: "emphasized", id: "mc24" },
+      { before: "He responded", after: "with detailed and helpful feedback.", answer: "promptly", id: "mc25" }
+    ]
+  ],
+  hard: [
+    [
+      { before: "She handed in the report", after: "the deadline, even though she had barely slept.", answer: "before", id: "h1" },
+      { before: "The presentation was", after: "— three hours of data and no coffee break.", answer: "exhausting", id: "h2" },
+      { before: "He", after: "on finishing the project alone, even when his teammates offered to help.", answer: "insisted", id: "h3" },
+      { before: "The new policy affects everyone", after: "their role or department.", answer: "regardless", id: "h4" },
+      { before: "She", after: "agreed to the terms, but her body language told a different story.", answer: "reluctantly", id: "h5" },
+      { before: "The manager postponed the meeting", after: "there were still too many unresolved issues.", answer: "because", id: "h6" },
+      { before: "Living", after: "a foreign country teaches you a great deal about yourself.", answer: "in", id: "h7" },
+      { before: "The results were", after: "impressive, given how little time they had to prepare.", answer: "surprisingly", id: "h8" },
+      { before: "He", after: "the mistake immediately but didn't know how to fix it.", answer: "noticed", id: "h9" },
+      { before: "The instructions were so", after: "that even experienced users made errors.", answer: "confusing", id: "h10" },
+      { before: "She walked", after: "the crowded market without stopping to look at anything.", answer: "through", id: "h11" },
+      { before: "I would love to accept your offer,", after: "I've already made other plans.", answer: "however", id: "h12" },
+      { before: "The team", after: "the launch date by two weeks due to technical problems.", answer: "postponed", id: "h13" },
+      { before: "He speaks so", after: "that it's hard to follow him in a conversation.", answer: "rapidly", id: "h14" },
+      { before: "It was an", after: "opportunity — one she knew she couldn't afford to miss.", answer: "extraordinary", id: "h15" },
+      { before: "The letter had been sitting", after: "her desk for three days before she opened it.", answer: "on", id: "h16" },
+      { before: "She studied every night", after: "she still didn't feel confident before the exam.", answer: "but", id: "h17" },
+      { before: "The children", after: "heavily on their teacher for guidance during the difficult weeks.", answer: "relied", id: "h18" },
+      { before: "The film was", after: "different from what the trailer had suggested.", answer: "completely", id: "h19" },
+      { before: "He gave a", after: "account of everything that had happened that evening.", answer: "detailed", id: "h20" },
+      { before: "She moved to a new city", after: "having no friends or family there.", answer: "despite", id: "h21" },
+      { before: "The amount of work was", after: ", and several team members asked for extra support.", answer: "overwhelming", id: "h22" },
+      { before: "He", after: "his involvement in the incident after seeing the security footage.", answer: "admitted", id: "h23" },
+      { before: "The view from the top of the hill was so", after: "that nobody wanted to leave.", answer: "beautiful", id: "h24" },
+      { before: "She had", after: "enough time to review her notes before the interview began.", answer: "barely", id: "h25" }
+    ],
+    [
+      { before: "The consultant's report was", after: "critical of the current management structure.", answer: "scathing", id: "hb1" },
+      { before: "He approached the challenge", after: "a combination of innovation and pragmatism.", answer: "with", id: "hb2" },
+      { before: "She", after: "the underlying assumptions of the original proposal.", answer: "questioned", id: "hb3" },
+      { before: "The initiative, while well-intentioned,", after: "numerous unintended consequences.", answer: "created", id: "hb4" },
+      { before: "They argued", after: "the point so extensively that no consensus was reached.", answer: "about", id: "hb5" },
+      { before: "The document was", after: "ambiguous in its interpretation of the clause.", answer: "deliberately", id: "hb6" },
+      { before: "She maintained her composure", after: "the prolonged criticism.", answer: "throughout", id: "hb7" },
+      { before: "He", after: "a sophisticated understanding of the market dynamics.", answer: "demonstrated", id: "hb8" },
+      { before: "The strategy, while risky,", after: "the organization's long-term sustainability.", answer: "ensures", id: "hb9" },
+      { before: "She navigated", after: "the bureaucratic maze with remarkable efficiency.", answer: "through", id: "hb10" },
+      { before: "I found his argument", after: "unconvincing, despite his credentials.", answer: "ultimately", id: "hb11" },
+      { before: "The proposal was criticized", after: "being overly ambitious and under-resourced.", answer: "for", id: "hb12" },
+      { before: "They", after: "the decision despite significant opposition.", answer: "implemented", id: "hb13" },
+      { before: "She articulated her position", after: "remarkable clarity and conviction.", answer: "with", id: "hb14" },
+      { before: "The analysis, though comprehensive,", after: "several critical variables.", answer: "overlooked", id: "hb15" },
+      { before: "He", after: "his colleagues of the necessity for radical change.", answer: "convinced", id: "hb16" },
+      { before: "The framework evolved", after: "the project progressed.", answer: "as", id: "hb17" },
+      { before: "Her methodology was", after: "rigorous and yielded unexpected insights.", answer: "exceptionally", id: "hb18" },
+      { before: "We", after: "the risks inherent in pursuing this direction.", answer: "underestimated", id: "hb19" },
+      { before: "The transformation was", after: "gradual, occurring over several fiscal quarters.", answer: "deliberately", id: "hb20" },
+      { before: "You should", after: "the fine print before committing to the agreement.", answer: "scrutinize", id: "hb21" },
+      { before: "The discrepancies were found", after: "the archived files.", answer: "within", id: "hb22" },
+      { before: "It was an", after: "discovery that challenged our fundamental assumptions.", answer: "unsettling", id: "hb23" },
+      { before: "She", after: "the complexity of the situation with nuance and wisdom.", answer: "acknowledged", id: "hb24" },
+      { before: "He proceeded", after: "with unexpected caution and deliberation.", answer: "nonetheless", id: "hb25" }
+    ],
+    [
+      { before: "The framework was designed to", after: "ambiguity and promote consistency across departments.", answer: "eliminate", id: "hc1" },
+      { before: "She analyzed the problem", after: "the lens of multiple stakeholder perspectives.", answer: "through", id: "hc2" },
+      { before: "He", after: "the validity of previous conclusions.", answer: "questioned", id: "hc3" },
+      { before: "The initiative encountered resistance,", after: "it addressed a genuine organizational need.", answer: "although", id: "hc4" },
+      { before: "They deliberated", after: "the proposal with meticulous attention to detail.", answer: "on", id: "hc5" },
+      { before: "The strategy proved", after: "counterintuitive, yet remarkably effective.", answer: "rather", id: "hc6" },
+      { before: "She persisted", after: "the setbacks and maintained her focus on the goal.", answer: "despite", id: "hc7" },
+      { before: "He", after: "an innovative solution that others had overlooked.", answer: "devised", id: "hc8" },
+      { before: "The outcome, while favorable,", after: "unexpected complexities in execution.", answer: "revealed", id: "hc9" },
+      { before: "She maneuvered", after: "the competing interests with diplomatic skill.", answer: "between", id: "hc10" },
+      { before: "I recognized the merit in her argument,", after: "I remained skeptical of the implementation.", answer: "yet", id: "hc11" },
+      { before: "The proposal was rejected", after: "insufficient evidence to support its feasibility.", answer: "due to", id: "hc12" },
+      { before: "They", after: "the new framework with considerable success.", answer: "adopted", id: "hc13" },
+      { before: "She conveyed her concerns", after: "a carefully calibrated presentation.", answer: "via", id: "hc14" },
+      { before: "The analysis revealed patterns", after: "previously unnoticed in the data.", answer: "that", id: "hc15" },
+      { before: "He", after: "the complexity of the situation without oversimplifying.", answer: "articulated", id: "hc16" },
+      { before: "The initiative centered", after: "the principles of transparency and accountability.", answer: "upon", id: "hc17" },
+      { before: "Her assessment was", after: "insightful and influenced the final decision.", answer: "profoundly", id: "hc18" },
+      { before: "We", after: "the implications of the proposed changes.", answer: "contemplated", id: "hc19" },
+      { before: "The shift was", after: "significant and warranted careful monitoring.", answer: "sufficiently", id: "hc20" },
+      { before: "You must", after: "every assumption before proceeding.", answer: "validate", id: "hc21" },
+      { before: "The evidence was buried", after: "mountains of contradictory data.", answer: "beneath", id: "hc22" },
+      { before: "It was a", after: "moment when the organization finally achieved consensus.", answer: "pivotal", id: "hc23" },
+      { before: "She", after: "her position with irrefutable logic and evidence.", answer: "substantiated", id: "hc24" },
+      { before: "He acted", after: "deliberate foresight regarding potential pitfalls.", answer: "with", id: "hc25" }
+    ]
+  ]
+};
+
+// ==================== PART OF SPEECH IDENTIFIER DATA ====================
+
+const partOfSpeechDataSets = {
+  easy: [
+    [
+      { before: "She walks to school", after: "every morning.", answer: "Adverb", id: "pos-e1" },
+      { before: "The", after: "dog barked loudly at the mailman.", answer: "Noun", id: "pos-e2" },
+      { before: "He is", after: "and kind to everyone.", answer: "Adjective", id: "pos-e3" },
+      { before: "They", after: "the game together.", answer: "Verb", id: "pos-e4" },
+      { before: "The book is", after: "the table.", answer: "Preposition", id: "pos-e5" },
+      { before: "She speaks English", after: "Spanish.", answer: "Conjunction", id: "pos-e6" },
+      { before: "The", after: "is very fast.", answer: "Noun", id: "pos-e7" },
+      { before: "He works", after: "in the morning.", answer: "Adverb", id: "pos-e8" },
+      { before: "The flowers are", after: "and colorful.", answer: "Adjective", id: "pos-e9" },
+      { before: "We", after: "coffee at the cafe.", answer: "Verb", id: "pos-e10" },
+      { before: "The cat sleeps", after: "the couch.", answer: "Preposition", id: "pos-e11" },
+      { before: "Do you like tea", after: "coffee?", answer: "Conjunction", id: "pos-e12" },
+      { before: "The", after: "is delicious.", answer: "Noun", id: "pos-e13" },
+      { before: "She runs", after: "every day.", answer: "Adverb", id: "pos-e14" },
+      { before: "The weather is", after: "today.", answer: "Adjective", id: "pos-e15" }
+    ],
+    [
+      { before: "She speaks", after: "and clearly.", answer: "Adverb", id: "pos-eb1" },
+      { before: "The", after: "flew across the sky.", answer: "Noun", id: "pos-eb2" },
+      { before: "The room is", after: "and spacious.", answer: "Adjective", id: "pos-eb3" },
+      { before: "We", after: "dinner together.", answer: "Verb", id: "pos-eb4" },
+      { before: "The pen is", after: "the desk.", answer: "Preposition", id: "pos-eb5" },
+      { before: "Would you like tea", after: "juice?", answer: "Conjunction", id: "pos-eb6" },
+      { before: "The", after: "are singing in the tree.", answer: "Noun", id: "pos-eb7" },
+      { before: "He laughs", answer: "Adverb", after: "at funny jokes.", id: "pos-eb8" },
+      { before: "The song is", after: "and moving.", answer: "Adjective", id: "pos-eb9" },
+      { before: "She", after: "her homework carefully.", answer: "Verb", id: "pos-eb10" },
+      { before: "The picture hangs", after: "the wall.", answer: "Preposition", id: "pos-eb11" },
+      { before: "We can meet today", after: "tomorrow.", answer: "Conjunction", id: "pos-eb12" },
+      { before: "The", after: "rang at noon.", answer: "Noun", id: "pos-eb13" },
+      { before: "He walked", after: "down the street.", answer: "Adverb", id: "pos-eb14" },
+      { before: "The apples are", after: "and sweet.", answer: "Adjective", id: "pos-eb15" }
+    ],
+    [
+      { before: "She reads", after: "every night.", answer: "Adverb", id: "pos-ec1" },
+      { before: "The", after: "jumped over the fence.", answer: "Noun", id: "pos-ec2" },
+      { before: "The house is", after: "and modern.", answer: "Adjective", id: "pos-ec3" },
+      { before: "We", after: "the project together.", answer: "Verb", id: "pos-ec4" },
+      { before: "The lamp is", after: "the corner.", answer: "Preposition", id: "pos-ec5" },
+      { before: "You can go left", after: "right.", answer: "Conjunction", id: "pos-ec6" },
+      { before: "The", after: "are blooming in spring.", answer: "Noun", id: "pos-ec7" },
+      { before: "He writes", answer: "Adverb", after: "in his journal.", id: "pos-ec8" },
+      { before: "The fabric is", after: "and soft.", answer: "Adjective", id: "pos-ec9" },
+      { before: "She", after: "the windows.", answer: "Verb", id: "pos-ec10" },
+      { before: "The ball rolled", after: "the chair.", answer: "Preposition", id: "pos-ec11" },
+      { before: "Is he coming today", after: "tomorrow?", answer: "Conjunction", id: "pos-ec12" },
+      { before: "The", after: "is very fresh.", answer: "Noun", id: "pos-ec13" },
+      { before: "She dances", after: "with grace.", answer: "Adverb", id: "pos-ec14" },
+      { before: "The sky is", after: "and clear.", answer: "Adjective", id: "pos-ec15" }
+    ]
+  ],
+  medium: [
+    [
+      { before: "The manager delegated responsibilities", after: "reluctantly.", answer: "Adverb", id: "pos-m1" },
+      { before: "The", after: "of the project was impressive.", answer: "Noun", id: "pos-m2" },
+      { before: "The report was", after: "and thoroughly analyzed.", answer: "Adjective", id: "pos-m3" },
+      { before: "They", after: "a comprehensive strategy.", answer: "Verb", id: "pos-m4" },
+      { before: "The decision was made", after: "consensus.", answer: "Preposition", id: "pos-m5" },
+      { before: "She wanted to advance her career", after: "maintain work-life balance.", answer: "Conjunction", id: "pos-m6" },
+      { before: "The", after: "required several revisions.", answer: "Noun", id: "pos-m7" },
+      { before: "He explained the concept", after: "clearly.", answer: "Adverb", id: "pos-m8" },
+      { before: "The outcome was", after: "and significant.", answer: "Adjective", id: "pos-m9" },
+      { before: "We", after: "the data extensively.", answer: "Verb", id: "pos-m10" },
+      { before: "The information was buried", after: "technical jargon.", answer: "Preposition", id: "pos-m11" },
+      { before: "The team worked hard", after: "achieved excellent results.", answer: "Conjunction", id: "pos-m12" },
+      { before: "The", after: "delivered the message effectively.", answer: "Noun", id: "pos-m13" },
+      { before: "She responded", after: "thoughtfully.", answer: "Adverb", id: "pos-m14" },
+      { before: "The methodology was", after: "and rigorous.", answer: "Adjective", id: "pos-m15" }
+    ],
+    [
+      { before: "He articulated his vision", after: "confidently.", answer: "Adverb", id: "pos-mb1" },
+      { before: "The", after: "of the research was published.", answer: "Noun", id: "pos-mb2" },
+      { before: "The implementation plan was", after: "and realistic.", answer: "Adjective", id: "pos-mb3" },
+      { before: "They", after: "the resources efficiently.", answer: "Verb", id: "pos-mb4" },
+      { before: "The decision was justified", after: "evidence.", answer: "Preposition", id: "pos-mb5" },
+      { before: "She pursued the opportunity", after: "faced resistance.", answer: "Conjunction", id: "pos-mb6" },
+      { before: "The", after: "raised significant concerns.", answer: "Noun", id: "pos-mb7" },
+      { before: "The team executed the plan", answer: "Adverb", after: "without hesitation.", id: "pos-mb8" },
+      { before: "The proposal seemed", after: "yet proved invaluable.", answer: "Adjective", id: "pos-mb9" },
+      { before: "He", after: "the fundamental issues.", answer: "Verb", id: "pos-mb10" },
+      { before: "The agreement was negotiated", after: "careful deliberation.", answer: "Preposition", id: "pos-mb11" },
+      { before: "The strategy was ambitious", after: "achievable.", answer: "Conjunction", id: "pos-mb12" },
+      { before: "The", after: "provided valuable insights.", answer: "Noun", id: "pos-mb13" },
+      { before: "She communicated her position", after: "effectively.", answer: "Adverb", id: "pos-mb14" },
+      { before: "The framework was", after: "and comprehensive.", answer: "Adjective", id: "pos-mb15" }
+    ],
+    [
+      { before: "The consultant advised", after: "cautiously.", answer: "Adverb", id: "pos-mc1" },
+      { before: "The", after: "of the organization improved substantially.", answer: "Noun", id: "pos-mc2" },
+      { before: "The approach was", after: "and methodical.", answer: "Adjective", id: "pos-mc3" },
+      { before: "They", after: "the objectives with precision.", answer: "Verb", id: "pos-mc4" },
+      { before: "The framework was established", after: "discussion.", answer: "Preposition", id: "pos-mc5" },
+      { before: "The initiative was bold", after: "necessary.", answer: "Conjunction", id: "pos-mc6" },
+      { before: "The", after: "was submitted for review.", answer: "Noun", id: "pos-mc7" },
+      { before: "He explained the rationale", answer: "Adverb", after: "and persuasively.", id: "pos-mc8" },
+      { before: "The results were", after: "and encouraging.", answer: "Adjective", id: "pos-mc9" },
+      { before: "She", after: "the challenges methodically.", answer: "Verb", id: "pos-mc10" },
+      { before: "The solution was formulated", after: "careful analysis.", answer: "Preposition", id: "pos-mc11" },
+      { before: "The team persisted", after: "faced setbacks.", answer: "Conjunction", id: "pos-mc12" },
+      { before: "The", after: "contained several recommendations.", answer: "Noun", id: "pos-mc13" },
+      { before: "They executed the strategy", after: "successfully.", answer: "Adverb", id: "pos-mc14" },
+      { before: "The outcome was", after: "and measurable.", answer: "Adjective", id: "pos-mc15" }
+    ]
+  ],
+  hard: [
+    [
+      { before: "The executive articulated the paradigm shift", after: "unambiguously.", answer: "Adverb", id: "pos-h1" },
+      { before: "The", after: "of organizational transformation was unprecedented.", answer: "Noun", id: "pos-h2" },
+      { before: "The methodology proved to be", after: "and efficacious.", answer: "Adjective", id: "pos-h3" },
+      { before: "They", after: "the nascent framework with meticulous attention.", answer: "Verb", id: "pos-h4" },
+      { before: "The initiative was conceived", after: "extensive stakeholder deliberation.", answer: "Preposition", id: "pos-h5" },
+      { before: "The proposal was ambitious", after: "strategically sound.", answer: "Conjunction", id: "pos-h6" },
+      { before: "The", after: "substantiated the hypothesis with empirical evidence.", answer: "Noun", id: "pos-h7" },
+      { before: "She contextualized the findings", answer: "Adverb", after: "yet persuasively.", id: "pos-h8" },
+      { before: "The assessment was", after: "and nuanced.", answer: "Adjective", id: "pos-h9" },
+      { before: "He", after: "the underlying variables systematically.", answer: "Verb", id: "pos-h10" },
+      { before: "The solution emerged", after: "iterative refinement.", answer: "Preposition", id: "pos-h11" },
+      { before: "The strategy was innovative", after: "encountered resistance.", answer: "Conjunction", id: "pos-h12" },
+      { before: "The", after: "elucidated the theoretical framework.", answer: "Noun", id: "pos-h13" },
+      { before: "They synthesized the complex data", after: "elegantly.", answer: "Adverb", id: "pos-h14" },
+      { before: "The outcome was", after: "yet transformative.", answer: "Adjective", id: "pos-h15" }
+    ],
+    [
+      { before: "The consultant evaluated the trajectory", after: "dispassionately.", answer: "Adverb", id: "pos-hb1" },
+      { before: "The", after: "precipitated a fundamental recalibration.", answer: "Noun", id: "pos-hb2" },
+      { before: "The approach was", after: "and circumspect.", answer: "Adjective", id: "pos-hb3" },
+      { before: "They", after: "the architectural constraints strategically.", answer: "Verb", id: "pos-hb4" },
+      { before: "The framework was developed", after: "multiple iterations.", answer: "Preposition", id: "pos-hb5" },
+      { before: "The proposal was visionary", after: "encountered institutional inertia.", answer: "Conjunction", id: "pos-hb6" },
+      { before: "The", after: "delineated the strategic imperatives.", answer: "Noun", id: "pos-hb7" },
+      { before: "She contextualized the phenomena", answer: "Adverb", after: "and coherently.", id: "pos-hb8" },
+      { before: "The methodology was", after: "and comprehensive.", answer: "Adjective", id: "pos-hb9" },
+      { before: "He", after: "the epistemological foundations rigorously.", answer: "Verb", id: "pos-hb10" },
+      { before: "The achievement was realized", after: "sustained effort.", answer: "Preposition", id: "pos-hb11" },
+      { before: "The initiative was ambitious", after: "strategically imperative.", answer: "Conjunction", id: "pos-hb12" },
+      { before: "The", after: "explicated the theoretical underpinnings.", answer: "Noun", id: "pos-hb13" },
+      { before: "They articulated the vision", after: "compellingly.", answer: "Adverb", id: "pos-hb14" },
+      { before: "The assessment was", after: "yet perspicacious.", answer: "Adjective", id: "pos-hb15" }
+    ],
+    [
+      { before: "The executive synthesized the divergent perspectives", after: "judiciously.", answer: "Adverb", id: "pos-hc1" },
+      { before: "The", after: "fundamentally reconfigured institutional priorities.", answer: "Noun", id: "pos-hc2" },
+      { before: "The strategy was", after: "yet operationally feasible.", answer: "Adjective", id: "pos-hc3" },
+      { before: "They", after: "the organizational dysfunctions systematically.", answer: "Verb", id: "pos-hc4" },
+      { before: "The paradigm was established", after: "meticulous deliberation.", answer: "Preposition", id: "pos-hc5" },
+      { before: "The approach was innovative", after: "encountered systemic resistance.", answer: "Conjunction", id: "pos-hc6" },
+      { before: "The", after: "deconstructed the prevailing theoretical framework.", answer: "Noun", id: "pos-hc7" },
+      { before: "She elucidated the dynamics", answer: "Adverb", after: "and perspicaciously.", id: "pos-hc8" },
+      { before: "The implementation was", after: "and transformative.", answer: "Adjective", id: "pos-hc9" },
+      { before: "He", after: "the foundational assumptions with rigor.", answer: "Verb", id: "pos-hc10" },
+      { before: "The solution crystallized", after: "continuous refinement.", answer: "Preposition", id: "pos-hc11" },
+      { before: "The initiative was audacious", after: "yielded tangible results.", answer: "Conjunction", id: "pos-hc12" },
+      { before: "The", after: "delineated the emergent paradigm.", answer: "Noun", id: "pos-hc13" },
+      { before: "The team operationalized the vision", after: "adeptly.", answer: "Adverb", id: "pos-hc14" },
+      { before: "The outcome proved", after: "substantive.", answer: "Adjective", id: "pos-hc15" }
+    ]
+  ]
+};
+
+// ==================== NAVIGATION FUNCTIONS ====================
+
+function selectDifficulty(difficulty) {
+  currentDifficulty = difficulty;
+  const diffTitle = { easy: 'Easy Level Exercises', medium: 'Medium Level Exercises', hard: 'Hard Level Exercises' };
+  document.getElementById('difficultyTitle').textContent = diffTitle[difficulty];
+  showScreen('exerciseSelection');
 }
 
-function startExercise() {
-  if (!currentLevel) return;
-  
-  if (currentLevel === 'easy') {
-    const randomSet = Math.floor(Math.random() * easyDataSets.length);
-    currentData = [...easyDataSets[randomSet]];
-  } else if (currentLevel === 'medium') {
-    const randomSet = Math.floor(Math.random() * mediumDataSets.length);
-    currentData = [...mediumDataSets[randomSet]];
-  } else {
-    const randomSet = Math.floor(Math.random() * hardDataSets.length);
-    currentData = [...hardDataSets[randomSet]];
-  }
-  
-  // Shuffle the data
-  currentData = currentData.sort(() => Math.random() - 0.5);
-  
-  document.getElementById('welcomeScreen').style.display = 'none';
-  document.getElementById('exerciseLayout').style.display = 'flex';
+function backToDifficulty() {
+  currentDifficulty = null;
+  showScreen('mainMenu');
+}
+
+function launchExercise(exercise) {
+  currentExercise = exercise;
+  showScreen('exercise');
   document.getElementById('headerNav').style.display = 'flex';
   
-  buildWordBank();
-  buildSentences();
+  if (exercise === 'grammar-master') {
+    document.getElementById('headerTitle').textContent = '🎯 Grammar Master';
+    document.getElementById('headerSubtitle').textContent = `${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)} Level`;
+    initGrammarMaster();
+  } else if (exercise === 'part-of-speech') {
+    document.getElementById('headerTitle').textContent = '🏷️ Part of Speech Identifier';
+    document.getElementById('headerSubtitle').textContent = `${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)} Level`;
+    initPartOfSpeech();
+  }
+}
+
+function showScreen(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  if (screen === 'mainMenu') {
+    document.getElementById('mainMenuScreen').classList.add('active');
+    document.getElementById('headerNav').style.display = 'none';
+  } else if (screen === 'exerciseSelection') {
+    document.getElementById('exerciseSelectionScreen').classList.add('active');
+    document.getElementById('headerNav').style.display = 'none';
+  } else if (screen === 'exercise') {
+    document.getElementById('exerciseScreen').classList.add('active');
+  }
 }
 
 function goBack() {
@@ -562,47 +730,32 @@ function goBack() {
 }
 
 function goToMainMenu() {
-  // Reset everything
-  document.getElementById('welcomeScreen').style.display = 'block';
-  document.getElementById('exerciseLayout').style.display = 'none';
-  document.getElementById('headerNav').style.display = 'none';
-  currentLevel = null;
+  currentExercise = null;
+  currentDifficulty = null;
+  currentData = [];
   selectedChip = null;
   document.getElementById('wordBank').innerHTML = '';
   document.getElementById('sentences').innerHTML = '';
   document.getElementById('scoreMsg').textContent = '';
-  // Deselect all level cards
-  document.querySelectorAll('.level-card').forEach(card => card.classList.remove('selected'));
+  showScreen('mainMenu');
 }
 
-function newExercise() {
-  // Select a random set from the current level
-  if (currentLevel === 'easy') {
-    const randomSet = Math.floor(Math.random() * easyDataSets.length);
-    currentData = [...easyDataSets[randomSet]];
-  } else if (currentLevel === 'medium') {
-    const randomSet = Math.floor(Math.random() * mediumDataSets.length);
-    currentData = [...mediumDataSets[randomSet]];
-  } else {
-    const randomSet = Math.floor(Math.random() * hardDataSets.length);
-    currentData = [...hardDataSets[randomSet]];
-  }
-  
-  // Shuffle the data
+// ==================== GRAMMAR MASTER EXERCISE ====================
+
+function initGrammarMaster() {
+  const sets = grammarMasterDataSets[currentDifficulty];
+  const randomSet = Math.floor(Math.random() * sets.length);
+  currentData = [...sets[randomSet]];
   currentData = currentData.sort(() => Math.random() - 0.5);
   
-  // Clear everything
-  document.getElementById('wordBank').innerHTML = '';
-  document.getElementById('sentences').innerHTML = '';
-  document.getElementById('scoreMsg').textContent = '';
-  selectedChip = null;
+  document.getElementById('instructions').textContent = '📌 Each sentence is missing one word. Drag the correct word from the word bank into the blank. Click a filled blank to return the word to the bank. Each word is used only once.';
+  document.getElementById('sidebarTitle').textContent = 'Word Bank';
   
-  // Rebuild
-  buildWordBank();
-  buildSentences();
+  buildGrammarWordBank();
+  buildGrammarSentences();
 }
 
-function buildWordBank() {
+function buildGrammarWordBank() {
   const bank = document.getElementById('wordBank');
   bank.innerHTML = '';
   const shuffled = [...currentData].sort(() => Math.random() - 0.5);
@@ -641,7 +794,7 @@ function buildWordBank() {
   });
 }
 
-function buildSentences() {
+function buildGrammarSentences() {
   const container = document.getElementById('sentences');
   container.innerHTML = '';
   currentData.forEach((item, i) => {
@@ -718,26 +871,197 @@ function returnWordById(chipId) {
   }
 }
 
+// ==================== PART OF SPEECH IDENTIFIER ====================
+
+function initPartOfSpeech() {
+  const sets = partOfSpeechDataSets[currentDifficulty];
+  const randomSet = Math.floor(Math.random() * sets.length);
+  currentData = [...sets[randomSet]];
+  currentData = currentData.sort(() => Math.random() - 0.5);
+  
+  document.getElementById('instructions').textContent = '📌 Each sentence is missing one word. Drag the correct part of speech from the word bank into the blank. Click a filled blank to return it to the bank.';
+  document.getElementById('sidebarTitle').textContent = 'Parts of Speech';
+  
+  buildPartOfSpeechBank();
+  buildPartOfSpeechSentences();
+}
+
+function buildPartOfSpeechBank() {
+  const bank = document.getElementById('wordBank');
+  bank.innerHTML = '';
+  
+  // Count how many of each part of speech we need
+  const answerCounts = {};
+  currentData.forEach(item => {
+    answerCounts[item.answer] = (answerCounts[item.answer] || 0) + 1;
+  });
+  
+  // Create chips for each answer based on the count
+  const chips = [];
+  let chipIndex = 0;
+  Object.keys(answerCounts).forEach(pos => {
+    for (let i = 0; i < answerCounts[pos]; i++) {
+      chips.push({ text: pos, id: `pos-${pos.toLowerCase()}-${chipIndex}` });
+      chipIndex++;
+    }
+  });
+  
+  // Shuffle the chips
+  chips.sort(() => Math.random() - 0.5);
+  
+  // Create and add chip elements
+  chips.forEach(chipData => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = chipData.text;
+    chip.dataset.id = chipData.id;
+    chip.draggable = true;
+    chip.id = 'chip_' + chipData.id;
+
+    chip.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', chipData.id);
+      setTimeout(() => chip.classList.add('dragging'), 0);
+      if (selectedChip) { selectedChip.style.outline = ''; selectedChip = null; }
+    });
+    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+    chip.addEventListener('click', () => {
+      if (selectedChip === chip) { chip.style.outline = ''; selectedChip = null; }
+      else {
+        if (selectedChip) selectedChip.style.outline = '';
+        selectedChip = chip;
+        chip.style.outline = '2px solid #1a56a0';
+      }
+    });
+
+    bank.appendChild(chip);
+  });
+
+  const bank_el = document.getElementById('wordBank');
+  bank_el.addEventListener('dragover', e => e.preventDefault());
+  bank_el.addEventListener('drop', e => {
+    e.preventDefault();
+    const posId = e.dataTransfer.getData('text/plain');
+    // Parts of speech don't get "used"
+  });
+}
+
+function buildPartOfSpeechSentences() {
+  const container = document.getElementById('sentences');
+  container.innerHTML = '';
+  currentData.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'sentence-row';
+
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = (i + 1) + '.';
+
+    const before = document.createElement('span');
+    before.textContent = item.before + ' ';
+
+    const drop = document.createElement('div');
+    drop.className = 'drop-zone';
+    drop.dataset.target = item.answer;
+
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+    drop.addEventListener('drop', e => {
+      e.preventDefault();
+      drop.classList.remove('drag-over');
+      const posId = e.dataTransfer.getData('text/plain');
+      const posText = document.getElementById('chip_' + posId).textContent;
+      placePartOfSpeech(posText, drop, posId);
+    });
+    drop.addEventListener('click', () => {
+      if (drop.dataset.filled) { 
+        const oldChipId = drop.dataset.filledChipId;
+        if (oldChipId) {
+          const oldChip = document.getElementById('chip_' + oldChipId);
+          if (oldChip) oldChip.classList.remove('used');
+        }
+        drop.textContent = '';
+        drop.classList.remove('filled', 'correct', 'incorrect');
+        delete drop.dataset.filled;
+        delete drop.dataset.filledChipId;
+      }
+      else if (selectedChip) {
+        const chipId = selectedChip.dataset.id;
+        placePartOfSpeech(selectedChip.textContent, drop, chipId);
+        selectedChip.style.outline = '';
+        selectedChip = null;
+      }
+    });
+
+    const after = document.createElement('span');
+    after.textContent = ' ' + item.after;
+
+    row.appendChild(num);
+    row.appendChild(before);
+    row.appendChild(drop);
+    row.appendChild(after);
+    container.appendChild(row);
+  });
+}
+
+function placePartOfSpeech(pos, drop, chipId) {
+  // If there's already something in this blank, return it to the bank first
+  if (drop.dataset.filled) {
+    const oldChipId = drop.dataset.filledChipId;
+    if (oldChipId) {
+      const oldChip = document.getElementById('chip_' + oldChipId);
+      if (oldChip) oldChip.classList.remove('used');
+    }
+  }
+  
+  // Mark the chip as used
+  const chip = document.getElementById('chip_' + chipId);
+  if (chip) chip.classList.add('used');
+  
+  // Fill the blank
+  drop.textContent = pos;
+  drop.classList.add('filled');
+  drop.classList.remove('correct', 'incorrect');
+  drop.dataset.filled = pos;
+  drop.dataset.filledChipId = chipId;
+}
+
+// ==================== CHECK & RESET ====================
+
 function checkAnswers() {
   let correct = 0;
   document.querySelectorAll('.drop-zone').forEach(drop => {
     if (!drop.dataset.filled) return;
     
-    // Get the word content from the filled chip
-    const filledChip = document.getElementById('chip_' + drop.dataset.filled);
-    const filledWord = filledChip ? filledChip.textContent : '';
+    const filledWord = drop.dataset.filled;
+    const targetAnswer = document.querySelector(`[data-target="${drop.dataset.target}"]`)?.parentElement?.textContent || '';
     
-    // Get the correct answer from the data
-    const targetItem = currentData.find(item => item.id === drop.dataset.target);
-    const correctWord = targetItem ? targetItem.answer : '';
-    
-    // Compare the actual words, not the chip IDs
-    if (filledWord === correctWord) {
-      drop.classList.add('correct'); drop.classList.remove('incorrect'); correct++;
-    } else {
-      drop.classList.add('incorrect'); drop.classList.remove('correct');
+    // For Grammar Master: compare actual words
+    if (currentExercise === 'grammar-master') {
+      const filledChip = document.getElementById('chip_' + drop.dataset.filled);
+      const correctAnswer = currentData.find(item => item.id === drop.dataset.target)?.answer;
+      if (filledChip && filledChip.textContent === correctAnswer) {
+        drop.classList.add('correct');
+        drop.classList.remove('incorrect');
+        correct++;
+      } else {
+        drop.classList.add('incorrect');
+        drop.classList.remove('correct');
+      }
+    }
+    // For Part of Speech: compare part of speech
+    else if (currentExercise === 'part-of-speech') {
+      const correctAnswer = drop.dataset.target;  // This is the answer text like "Noun"
+      if (filledWord === correctAnswer) {
+        drop.classList.add('correct');
+        drop.classList.remove('incorrect');
+        correct++;
+      } else {
+        drop.classList.add('incorrect');
+        drop.classList.remove('correct');
+      }
     }
   });
+  
   const msg = document.getElementById('scoreMsg');
   if (correct === currentData.length) {
     msg.textContent = `🎉 Perfect score! ${correct} / ${currentData.length}`;
@@ -756,6 +1080,15 @@ function resetAll() {
   document.querySelectorAll('.chip').forEach(c => { c.classList.remove('used'); c.style.outline = ''; });
   document.getElementById('scoreMsg').textContent = '';
   selectedChip = null;
+}
+
+function newExercise() {
+  resetAll();
+  if (currentExercise === 'grammar-master') {
+    initGrammarMaster();
+  } else if (currentExercise === 'part-of-speech') {
+    initPartOfSpeech();
+  }
 }
 
 function launchConfetti() {
